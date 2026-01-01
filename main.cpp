@@ -9,6 +9,13 @@ constexpr TGAColor yellow  = {  0, 200, 255, 255};
 
 void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color){
 
+    bool steep = abs(ax-bx)<abs(ay-by);
+
+    if (steep){ // if the line is steep we tranpose the image??
+        swap(ax,ay);
+        swap(bx,by);
+    }
+
     if (ax>bx){//making the ax smaller x and bx the alarger x all the time.
         swap(ax,bx);
         swap(ay,by);
@@ -17,7 +24,12 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
     for (int x=ax; x<=bx; x++) {
         float t = (x-ax) / static_cast<float>(bx-ax);
         int y = round( ay + (by - ay)*t);
-        framebuffer.set(x,y,color);
+        
+
+        if (steep)
+            framebuffer.set(y,x,color);
+        else
+            framebuffer.set(x,y,color);
 
     }
 
