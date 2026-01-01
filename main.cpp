@@ -21,15 +21,23 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
         swap(ay,by);
     }
 
+    
+    //The error variable is just tracking "How far away is the real line from the pixel I am currently drawing?"
+    int y = ay;
+    float error = 0;
     for (int x=ax; x<=bx; x++) {
-        float t = (x-ax) / static_cast<float>(bx-ax);
-        int y = round( ay + (by - ay)*t);
-        
-
         if (steep)
             framebuffer.set(y,x,color);
         else
             framebuffer.set(x,y,color);
+        error += (by-ay) / static_cast<float>(bx-ax);
+        /*
+        this error calculation is genius mathematics .
+        */
+        if (error>.5) {
+            y += by > ay ? 1 : -1;
+            error -= 1.;
+        }
 
     }
 
