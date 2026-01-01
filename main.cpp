@@ -9,8 +9,9 @@ constexpr TGAColor yellow  = {  0, 200, 255, 255};
 
 void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color){
 
-    for (float t=0;t<1;t+= 0.02){
-        int x = round( ax + (bx - ax)*t);
+
+    for (int x=ax; x<=bx; x++) {
+        float t = (x-ax) / static_cast<float>(bx-ax);
         int y = round( ay + (by - ay)*t);
         framebuffer.set(x,y,color);
 
