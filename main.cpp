@@ -9,6 +9,10 @@ constexpr TGAColor yellow  = {  0, 200, 255, 255};
 
 void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color){
 
+    if (ax>bx){//making the ax smaller x and bx the alarger x all the time.
+        swap(ax,bx);
+        swap(ay,by);
+    }
 
     for (int x=ax; x<=bx; x++) {
         float t = (x-ax) / static_cast<float>(bx-ax);
