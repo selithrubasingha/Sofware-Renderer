@@ -44,6 +44,8 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
+}
+
 int main(int argc, char** argv) {
     constexpr int width  = 64;
     constexpr int height = 64;
