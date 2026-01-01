@@ -38,10 +38,9 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
         so instead of dy/dx>0.5 ----> we do :: 2*dy >dx
         */
         ierror += 2 * abs(by-ay);
-        if (ierror > bx - ax) {
-            y += by > ay ? 1 : -1;
-            ierror -= 2 * (bx-ax);
-    }
+        //if statement is removed and ternary is used ... because CPU is more efficient when ternary is used. 
+        y += (by > ay ? 1 : -1) * (ierror > bx - ax);
+        ierror -= 2 * (bx-ax)   * (ierror > bx - ax);
 
 }
 
