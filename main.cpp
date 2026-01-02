@@ -47,6 +47,10 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
+/*
+This is my method of drawing triangles to render images ... My own method , although it may be kind of inefficient and lengthly
+it works.
+*/
 void triangle(Points P, vector<Vertex> &verts, TGAImage &framebuffer , TGAColor color){
     Vertex v_a = verts[P.a]; 
     Vertex v_b = verts[P.b];
