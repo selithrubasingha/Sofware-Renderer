@@ -47,27 +47,49 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
-void triangle(Vertex){
-    
+void triangle(Points P, vector<Vertex> &verts, TGAImage &framebuffer , TGAColor color){
+    Vertex v_a = verts[P.a]; 
+    Vertex v_b = verts[P.b];
+    Vertex v_c = verts[P.c];
+
+    // 1. Define screen dimensions (Must match your TGAImage size)
+    int width = 500;
+    int height = 500;
+
+    // 2. Convert World Coordinates (float) -> Screen Coordinates (int)
+    // We add 1 and divide by 2 to move the range from [-1, 1] to [0, 1]
+    int x0 = (v_a.x + 1.) * width / 2.;
+    int y0 = (v_a.y + 1.) * height / 2.;
+
+    int x1 = (v_b.x + 1.) * width / 2.;
+    int y1 = (v_b.y + 1.) * height / 2.;
+
+    int x2 = (v_c.x + 1.) * width / 2.;
+    int y2 = (v_c.y + 1.) * height / 2.;
+
+    // 3. Draw the 3 lines connecting the points
+    line(x0, y0, x1, y1, framebuffer, color); // Line A -> B
+    line(x1, y1, x2, y2, framebuffer, color); // Line B -> C
+    line(x2, y2, x0, y0, framebuffer, color); // Line C -> A
+
+
 }
 
 int main(int argc, char** argv) {
-    constexpr int width  = 64;
-    constexpr int height = 64;
+    constexpr int width  = 500;
+    constexpr int height = 500;
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    int ax =  7, ay =  3;
-    int bx = 12, by = 37;
-    int cx = 62, cy = 53;
+    vector<Vertex> vertices;
+    vector<Points> faces;
 
-    line(ax, ay, bx, by, framebuffer, blue);
-    line(cx, cy, bx, by, framebuffer, green);
-    line(cx, cy, ax, ay, framebuffer, yellow);
-    line(ax, ay, cx, cy, framebuffer, red);
+    // 2. Load the data using the function from objread.cpp
+    load_obj(vertices, faces);
 
-    framebuffer.set(ax, ay, white);
-    framebuffer.set(bx, by, white);
-    framebuffer.set(cx, cy, white);
+    for (int i = 0; i < faces.size(); i++) {
+        // Pass the specific face AND the full list of vertices
+        triangle(faces[i], vertices, framebuffer , red);
+    }
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;

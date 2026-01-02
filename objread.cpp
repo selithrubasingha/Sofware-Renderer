@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// Keep your structs here
 struct Vertex { 
     float x;
     float y;
@@ -18,26 +19,19 @@ struct Points {
     int c;
 };
 
-int main()
+// CHANGE: Rename 'main' to 'load_obj' and pass vectors by reference
+void load_obj(vector<Vertex> &vertices, vector<Points> &triangles)
 {
     string line;
-    vector<Vertex> vertices;
-    
-    // We will store faces as a list of triangles.
-    // Each triangle is a list of 3 Vertices.
-    vector<Points> triangles;
-
-
     ifstream myfile("obj/diablo3_pose/diablo3_pose.obj");
 
     if (!myfile.is_open()) {
         cout << "Error opening file!" << endl;
-        return 1;
+        return;
     }
 
     while (getline(myfile, line))
     {
-        // 1. Parse Vertices
         if (line.substr(0, 2) == "v ")
         {
             istringstream iss(line);
@@ -46,7 +40,6 @@ int main()
             iss >> trash >> v.x >> v.y >> v.z;
             vertices.push_back(v);
         }
-        // 2. Parse Faces
         else if (line.substr(0, 2) == "f ")
         {
             istringstream iss(line);
@@ -54,11 +47,10 @@ int main()
             iss >> trash;
 
             Points tri;
-
             for (int i = 0; i < 3; i++) {
                 string segment;
                 iss >> segment;
-
+                // Note: using -1 because OBJ is 1-based, C++ is 0-based
                 int index = stoi(segment.substr(0, segment.find('/'))) - 1;
 
                 if (i == 0) tri.a = index;
@@ -67,14 +59,8 @@ int main()
             }
             triangles.push_back(tri);
         }
-
-            
-        }
-
-
+    }
+    
     cout << "Loaded " << vertices.size() << " vertices." << endl;
     cout << "Loaded " << triangles.size() << " faces." << endl;
-
-    return 0;
 }
-
