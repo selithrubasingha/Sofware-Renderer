@@ -1,12 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream> // Required for stringstream
-#include <vector>  // Required for std::vector
+#include <sstream>
+#include <vector>
 
 using namespace std;
 
-// 1. Create a structure to hold one 3D point
 struct Vertex {
     float x;
     float y;
@@ -16,11 +15,11 @@ struct Vertex {
 int main()
 {
     string line;
-    
-    // 2. Use a vector instead of a fixed array. 
-    // This allows the list to grow as big as the file needs.
     vector<Vertex> vertices;
-    vector<vector<Vertex>> triangles;
+    
+    // We will store faces as a list of triangles.
+    // Each triangle is a list of 3 Vertices.
+    vector<vector<Vertex>> triangles; 
 
     ifstream myfile("obj/diablo3_pose/diablo3_pose.obj");
 
@@ -31,30 +30,51 @@ int main()
 
     while (getline(myfile, line))
     {
-        // Check if the line starts with "v" and a space (to avoid "vt" or "vn")
+        // 1. Parse Vertices
         if (line.substr(0, 2) == "v ")
         {
-            // 3. THE FIX: Create a stringstream from the CURRENT line
             istringstream iss(line);
-            
-            char trash; // To hold the letter 'v'
-            Vertex v;   // A temporary variable to hold the numbers
-
-            // Read from the stringstream, NOT the file
+            char trash; 
+            Vertex v;
             iss >> trash >> v.x >> v.y >> v.z;
-
-            // Add the vertex to our list
             vertices.push_back(v);
+        }
+        // 2. Parse Faces
+        else if (line.substr(0, 2) == "f ")
+        {
+            istringstream iss(line);
+            char trash;
+            iss >> trash; // Eat the 'f'
+
+            vector<Vertex> face; // To hold the 3 vertices of this triangle
+            string segment;
+            
+            // Loop 3 times to get the 3 vertices of the triangle
+            // Each 'segment' will look like "1193/1240/1193"
+            for (int i = 0; i < 3; i++) {
+                iss >> segment; 
+
+                // We need to stop at the first '/' to get the vertex index
+                string indexStr = segment.substr(0, segment.find('/'));
+                
+                // Convert string to int
+                int index = stoi(indexStr);
+
+                // OBJ indices are 1-based, C++ vectors are 0-based. Subtract 1.
+                index--; 
+
+                // Retrieve the vertex from our list and add to the face
+                // Safety check to ensure index is valid
+                if(index >= 0 && index < vertices.size()){
+                    face.push_back(vertices[index]);
+                }
+            }
+            triangles.push_back(face);
         }
     }
 
-    // Verification: Print out what we stored
-    cout << "Successfully loaded " << vertices.size() << " vertices." << endl;
-    
-    // Example: Accessing the first vertex (Index 0)
-    if (!vertices.empty()) {
-        cout << "First Vertex: " << vertices[0].x << ", " << vertices[0].y << ", " << vertices[0].z << endl;
-    }
+    cout << "Loaded " << vertices.size() << " vertices." << endl;
+    cout << "Loaded " << triangles.size() << " faces." << endl;
 
     return 0;
 }
