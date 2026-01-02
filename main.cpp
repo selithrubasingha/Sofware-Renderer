@@ -1,12 +1,17 @@
-#include "tgaimage.h"
-#include "objread.cpp"
 #include <cmath>
+#include <tuple>
+#include "geometry.h"
+#include "model.h"
+#include "tgaimage.h"
+
 using namespace std;
-constexpr TGAColor white   = {255, 255, 255, 255}; // attention, BGRA order
-constexpr TGAColor green   = {  0, 255,   0, 255};
+
+constexpr int width  = 800;
+constexpr int height = 800;
+
+constexpr TGAColor white   = {255, 255, 255, 255};
 constexpr TGAColor red     = {  0,   0, 255, 255};
-constexpr TGAColor blue    = {255, 128,  64, 255};
-constexpr TGAColor yellow  = {  0, 200, 255, 255};
+
 
 void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color){
 
@@ -47,48 +52,34 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
-void triangle(Points P, vector<Vertex> &verts, TGAImage &framebuffer , TGAColor color){
-    Vertex v_a = verts[P.a]; 
-    Vertex v_b = verts[P.b];
-    Vertex v_c = verts[P.c];
-
-    // 1. Define screen dimensions (Must match your TGAImage size)
-    int width = 500;
-    int height = 500;
-
-    // 2. Convert World Coordinates (float) -> Screen Coordinates (int)
-    // We add 1 and divide by 2 to move the range from [-1, 1] to [0, 1]
-    int x0 = (v_a.x + 1.) * width / 2.;
-    int y0 = (v_a.y + 1.) * height / 2.;
-
-    int x1 = (v_b.x + 1.) * width / 2.;
-    int y1 = (v_b.y + 1.) * height / 2.;
-
-    int x2 = (v_c.x + 1.) * width / 2.;
-    int y2 = (v_c.y + 1.) * height / 2.;
-
-    // 3. Draw the 3 lines connecting the points
-    line(x0, y0, x1, y1, framebuffer, color); // Line A -> B
-    line(x1, y1, x2, y2, framebuffer, color); // Line B -> C
-    line(x2, y2, x0, y0, framebuffer, color); // Line C -> A
-
-
+// We accept vec4, but we only use v.x and v.y. 
+std::tuple<int,int> project(vec4 v) { 
+    return { (v.x + 1.) * width/2, 
+             (v.y + 1.) * height/2 }; 
 }
 
 int main(int argc, char** argv) {
-    constexpr int width  = 500;
-    constexpr int height = 500;
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " obj/model.obj" << endl;
+        return 1;
+    }
+
+    Model model(argv[1]);
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    vector<Vertex> vertices;
-    vector<Points> faces;
+    for (int i=0; i<model.nfaces(); i++) { 
+        auto [ax, ay] = project(model.vert(i, 0));
+        auto [bx, by] = project(model.vert(i, 1));
+        auto [cx, cy] = project(model.vert(i, 2));
+        line(ax, ay, bx, by, framebuffer, red);
+        line(bx, by, cx, cy, framebuffer, red);
+        line(cx, cy, ax, ay, framebuffer, red);
+    }
 
-    // 2. Load the data using the function from objread.cpp
-    load_obj(vertices, faces);
-
-    for (int i = 0; i < faces.size(); i++) {
-        // Pass the specific face AND the full list of vertices
-        triangle(faces[i], vertices, framebuffer , red);
+    for (int i=0; i<model.nverts(); i++) { 
+        vec4 v = model.vert(i);            
+        auto [x, y] = project(v);          
+        framebuffer.set(x, y, white);
     }
 
     framebuffer.write_tga_file("framebuffer.tga");
