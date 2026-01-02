@@ -6,10 +6,16 @@
 
 using namespace std;
 
-struct Vertex {
+struct Vertex { 
     float x;
     float y;
     float z;
+};
+
+struct Points {
+    int a;
+    int b;
+    int c;
 };
 
 int main()
@@ -19,7 +25,8 @@ int main()
     
     // We will store faces as a list of triangles.
     // Each triangle is a list of 3 Vertices.
-    vector<vector<Vertex>> triangles; 
+    vector<Points> triangles;
+
 
     ifstream myfile("obj/diablo3_pose/diablo3_pose.obj");
 
@@ -44,37 +51,30 @@ int main()
         {
             istringstream iss(line);
             char trash;
-            iss >> trash; // Eat the 'f'
+            iss >> trash;
 
-            vector<Vertex> face; // To hold the 3 vertices of this triangle
-            string segment;
-            
-            // Loop 3 times to get the 3 vertices of the triangle
-            // Each 'segment' will look like "1193/1240/1193"
+            Points tri;
+
             for (int i = 0; i < 3; i++) {
-                iss >> segment; 
+                string segment;
+                iss >> segment;
 
-                // We need to stop at the first '/' to get the vertex index
-                string indexStr = segment.substr(0, segment.find('/'));
-                
-                // Convert string to int
-                int index = stoi(indexStr);
+                int index = stoi(segment.substr(0, segment.find('/'))) - 1;
 
-                // OBJ indices are 1-based, C++ vectors are 0-based. Subtract 1.
-                index--; 
-
-                // Retrieve the vertex from our list and add to the face
-                // Safety check to ensure index is valid
-                if(index >= 0 && index < vertices.size()){
-                    face.push_back(vertices[index]);
-                }
+                if (i == 0) tri.a = index;
+                if (i == 1) tri.b = index;
+                if (i == 2) tri.c = index;
             }
-            triangles.push_back(face);
+            triangles.push_back(tri);
         }
-    }
+
+            
+        }
+
 
     cout << "Loaded " << vertices.size() << " vertices." << endl;
     cout << "Loaded " << triangles.size() << " faces." << endl;
 
     return 0;
 }
+

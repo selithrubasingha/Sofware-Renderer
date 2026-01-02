@@ -1,4 +1,5 @@
 #include "tgaimage.h"
+#include "objread.cpp"
 #include <cmath>
 using namespace std;
 constexpr TGAColor white   = {255, 255, 255, 255}; // attention, BGRA order
@@ -44,6 +45,10 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
+}
+
+void triangle(Vertex){
+    
 }
 
 int main(int argc, char** argv) {
