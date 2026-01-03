@@ -52,43 +52,15 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
-int y_to_x(int ax , int ay , int bx , int by ,int y ){
 
-    int x =(((bx-ax)*(y-ay))/(by-ay))+ax;
-
-    return x;
-
-}
-
-void fill_triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuffer, TGAColor color){
-    //hardcodign for now 
-    int mid_y = ay;
-    int low_y = by;
-    int high_y = cy;
-
-    int mid_x = ax;
-    int low_x = bx;
-    int high_x = cx;
-
-    for (int y = low_y ; y<= high_y ; y++ ){
-        if (y<mid_y){
-            int x_1 = y_to_x(low_x,low_y,high_x,high_y,y);
-            int x_2 = y_to_x(low_x,low_y,mid_x,mid_y,y);
-
-            line(x_1,y,x_2,y,framebuffer,color);
-            
-        }else{
-            int x_1 = y_to_x(low_x,low_y,high_x,high_y,y);
-            int x_2 = y_to_x(mid_x,mid_y,high_x,high_y,y);
-
-            line(x_2,y,x_1,y,framebuffer,color);
-        }
-    }
-
-
-}
 
 void triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuffer, TGAColor color) {
+
+    //mini-bubblesort method 
+    if (ay>by) { std::swap(ax, bx); std::swap(ay, by); }
+    if (ay>cy) { std::swap(ax, cx); std::swap(ay, cy); }
+    if (by>cy) { std::swap(bx, cx); std::swap(by, cy); }
+
     line(ax, ay, bx, by, framebuffer, color);
     line(bx, by, cx, cy, framebuffer, color);
     line(cx, cy, ax, ay, framebuffer, color);
@@ -97,14 +69,11 @@ void triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuf
 int main(int argc, char** argv) {
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    int low_y = 5;
-    int mid_y = 35;
-    int high_y = 110;
 
-    // triangle(  7, 45, 35, 100, 45,  60, framebuffer, red);
-    triangle(120, mid_y, 90,   low_y, 45, high_y, framebuffer, white);
-    // triangle(115, 83, 80,  90, 85, 120, framebuffer, green);
-    fill_triangle(120, mid_y, 90,   low_y, 45, high_y, framebuffer, white);
+
+    triangle(  7, 45, 35, 100, 45,  60, framebuffer, red);
+    triangle(120, 35, 90,   5, 45, 110, framebuffer, white);
+    triangle(115, 83, 80,  90, 85, 120, framebuffer, green);
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
