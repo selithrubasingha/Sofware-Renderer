@@ -6,8 +6,9 @@
 
 using namespace std;
 
-constexpr int width  = 128;
-constexpr int height = 128;
+
+constexpr int width  = 800;
+constexpr int height = 800;
 
 constexpr TGAColor white   = {255, 255, 255, 255};
 constexpr TGAColor red     = {  0,   0, 255, 255};
@@ -56,6 +57,10 @@ double signed_triangle_area(int ax, int ay, int bx, int by, int cx, int cy) {
     return .5*((by-ay)*(bx+ax) + (cy-by)*(cx+bx) + (ay-cy)*(ax+cx));
 }
 
+// We accept vec4, but we only use v.x and v.y. 
+std::tuple<int,int> project(vec4 v) { 
+    return { (v.x + 1.) * width/2, 
+             (v.y + 1.) * height/2 }; }
 
 void triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuffer, TGAColor color) {
 
@@ -94,13 +99,22 @@ Barycentric coordinates
 }
 
 int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " obj/model.obj" << std::endl;
+        return 1;
+    }
+
+    Model model(argv[1]);
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-
-
-    triangle(  7, 45, 35, 100, 45,  60, framebuffer, red);
-    triangle(120, 35, 90,   5, 45, 110, framebuffer, white);
-    triangle(115, 83, 80,  90, 85, 120, framebuffer, green);
+    for (int i=0; i<model.nfaces(); i++) { // iterate through all triangles
+        auto [ax, ay] = project(model.vert(i, 0));
+        auto [bx, by] = project(model.vert(i, 1));
+        auto [cx, cy] = project(model.vert(i, 2));
+        TGAColor rnd;
+        for (int c=0; c<3; c++) rnd[c] = std::rand()%255;
+        triangle(ax, ay, bx, by, cx, cy, framebuffer, rnd);
+    }
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
