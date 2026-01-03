@@ -52,6 +52,10 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 }
 
+/* 
+This brnach contains MY own implementation of rasterization ... although the x,y coordinates are kindof hardcoded
+converteing those is kindof trivial , I used some linear algebra techniques for this
+*/
 int y_to_x(int ax , int ay , int bx , int by ,int y ){
 
     int x =(((bx-ax)*(y-ay))/(by-ay))+ax;
