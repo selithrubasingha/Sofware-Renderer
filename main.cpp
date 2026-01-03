@@ -54,7 +54,7 @@ void line(int ax, int ay, int bx, int by, TGAImage &framebuffer, TGAColor color)
 
 int y_to_x(int ax , int ay , int bx , int by ,int y ){
 
-    int x = ((bx-ax)*(y-ax))/(by-ay);
+    int x =(((bx-ax)*(y-ay))/(by-ay))+ax;
 
     return x;
 
@@ -81,7 +81,7 @@ void fill_triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &fra
             int x_1 = y_to_x(low_x,low_y,high_x,high_y,y);
             int x_2 = y_to_x(mid_x,mid_y,high_x,high_y,y);
 
-            line(x_1,y,x_2,y,framebuffer,color);
+            line(x_2,y,x_1,y,framebuffer,color);
         }
     }
 
@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
     // triangle(  7, 45, 35, 100, 45,  60, framebuffer, red);
     triangle(120, mid_y, 90,   low_y, 45, high_y, framebuffer, white);
     // triangle(115, 83, 80,  90, 85, 120, framebuffer, green);
+    fill_triangle(120, mid_y, 90,   low_y, 45, high_y, framebuffer, white);
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
