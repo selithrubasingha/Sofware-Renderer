@@ -21,7 +21,9 @@ void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, in
             double gamma = signed_triangle_area(x, y, ax, ay, bx, by) / total_area;
             if (alpha<0 || beta<0 || gamma<0) continue; // negative barycentric coordinate => the pixel is outside the triangle
             unsigned char z = static_cast<unsigned char>(alpha * az + beta * bz + gamma * cz);
-            framebuffer.set(x, y, {z});
+            unsigned char i = static_cast<unsigned char>(alpha * az + beta * cz + gamma * bz);
+            unsigned char j = static_cast<unsigned char>(alpha * cz + beta * bz + gamma * az);
+            framebuffer.set(x, y, {z,i,j});
         }
     }
 }
@@ -29,14 +31,14 @@ void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, in
 int main(int argc, char** argv) {
     constexpr int width  = 64;
     constexpr int height = 64;
-    TGAImage framebuffer(width, height, TGAImage::GRAYSCALE);
+    TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    int ax = 17, ay =  4, az =  13;
-    int bx = 55, by = 39, bz = 128;
+    int ax = 17, ay =  4, az =  0;
+    int bx = 55, by = 39, bz = 0;
     int cx = 23, cy = 59, cz = 255;
 
     // Swapped b and c coordinates
-triangle(ax, ay, az, cx, cy, cz, bx, by, bz, framebuffer);
+triangle(ax, ay, az, bx, by, bz, cx, cy, cz, framebuffer);
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
