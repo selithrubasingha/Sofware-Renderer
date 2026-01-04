@@ -70,6 +70,8 @@ void triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuf
     int bbmaxy = std::max(std::max(ay, by), cy);
     double total_area = signed_triangle_area(ax, ay, bx, by, cx, cy);
 
+    int az = 255 , bz = 0, cz = 0; // dummy z coordinates for the sake of the example
+
     /*
 preproccer directives (just like include)
 tells the computer to do stuff before it starts compiling
@@ -92,7 +94,10 @@ Barycentric coordinates
                 double gamma = signed_triangle_area(x, y, ax, ay, bx, by) / total_area;
                 if (alpha<0 || beta<0 || gamma<0) continue; // negative barycentric coordinate => the pixel is outside the triangle
              
-                framebuffer.set(x, y, color);
+                unsigned char z = static_cast<unsigned char>(alpha * az + beta * bz + gamma * cz);
+                unsigned char i = static_cast<unsigned char>(alpha * bz + beta * az + gamma * cz);
+                unsigned char j = static_cast<unsigned char>(alpha * cz + beta * bz + gamma * az);
+                framebuffer.set(x, y, {z,i,j});
             }
     }
     
