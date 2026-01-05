@@ -58,7 +58,7 @@ double signed_triangle_area(int ax, int ay, int bx, int by, int cx, int cy) {
 }
 
 // We accept vec4, but we only use v.x and v.y. 
-std::tuple<int,int> project(vec4 v) { 
+std::tuple<int,int> project(vec4 v) {  
     return { (v.x + 1.) * width/2, 
              (v.y + 1.) * height/2 }; }
 
