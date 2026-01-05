@@ -57,6 +57,14 @@ Barycentric coordinates
                 double gamma = signed_triangle_area(x, y, ax, ay, bx, by) / total_area;
                 if (alpha<0 || beta<0 || gamma<0) continue; // negative barycentric coordinate => the pixel is outside the triangle
                 unsigned char z = static_cast<unsigned char>(alpha * az + beta * bz + gamma * cz);
+
+                /*
+                given below is the single line that solves the depth buffer issue .
+                z is (0,255) and z= 255 means closer to the screen and z=0 means farthest (deeper into the screen)
+                so we compare the current z with the z already present in the zbuffer at (x,y)
+                */
+                if (z <= zbuffer.get(x, y)[0]) continue;
+
                 zbuffer.set(x, y, {z});
                 framebuffer.set(x, y, color);
             }
