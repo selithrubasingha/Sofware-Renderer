@@ -6,7 +6,9 @@
 
 using namespace std;
 
-
+/*
+IN THIS BRANCH ALL THE RASTERIZATION STUFF IN THE TUTORIAL IS COMPLETE
+*/
 constexpr int width  = 800;
 constexpr int height = 800;
 
@@ -58,7 +60,7 @@ double signed_triangle_area(int ax, int ay, int bx, int by, int cx, int cy) {
 }
 
 // We accept vec4, but we only use v.x and v.y. 
-std::tuple<int,int> project(vec4 v) {  
+std::tuple<int,int> project(vec4 v) { 
     return { (v.x + 1.) * width/2, 
              (v.y + 1.) * height/2 }; }
 
@@ -70,7 +72,8 @@ void triangle(int ax, int ay, int bx, int by, int cx, int cy, TGAImage &framebuf
     int bbmaxy = std::max(std::max(ay, by), cy);
     double total_area = signed_triangle_area(ax, ay, bx, by, cx, cy);
 
-    int az = 255 , bz = 0, cz = 0; // dummy z coordinates for the sake of the example
+    if (total_area<1) return;  // backface culling + discarding triangles that cover less than a pixel
+
 
     /*
 preproccer directives (just like include)
@@ -94,10 +97,7 @@ Barycentric coordinates
                 double gamma = signed_triangle_area(x, y, ax, ay, bx, by) / total_area;
                 if (alpha<0 || beta<0 || gamma<0) continue; // negative barycentric coordinate => the pixel is outside the triangle
              
-                unsigned char z = static_cast<unsigned char>(alpha * az + beta * bz + gamma * cz);
-                unsigned char i = static_cast<unsigned char>(alpha * bz + beta * az + gamma * cz);
-                unsigned char j = static_cast<unsigned char>(alpha * cz + beta * bz + gamma * az);
-                framebuffer.set(x, y, {z,i,j});
+                framebuffer.set(x, y, color);
             }
     }
     
