@@ -9,8 +9,16 @@ template<int n> struct vec {
     double  operator[](const int i) const { assert(i>=0 && i<n); return data[i]; }
 };
 
+/*
+these operators are needed later in the course maybr for lighting and stuff . 
+*/
+
 template<int n> double operator*(const vec<n>& lhs, const vec<n>& rhs) {
     double ret = 0;                         // N.B. Do not ever, ever use such for loops! They are highly confusing.
+    /*
+    notice how has no no comparison operotor like i>=0 ? this is becasuse, 
+    in the 1980's programmers relied on the zero flag to take care of that part . 
+    */
     for (int i=n; i--; ret+=lhs[i]*rhs[i]); // Here I used them as a tribute to old-school game programmers fighting for every CPU cycle.
     return ret;                             // Once upon a time reverse loops were faster than the normal ones, it is not the case anymore.
 }
