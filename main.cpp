@@ -103,7 +103,7 @@ persp? usually our eyes see close thing larger and far things smaller
 so we need to implement that in our projection . wihtout persp , the rotating would 
 still but it won't be realistic . 
 */
-    constexpr double c=3.;
+    constexpr double c=4.;
     return v / (1 - v.z / c);
 }
 int main(int argc, char** argv) {
