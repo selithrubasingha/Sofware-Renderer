@@ -81,8 +81,11 @@ vec3 rot(vec3 v){
 // Accept vec4, Return vec4
 vec4 rot(vec4 v) {
     constexpr double a = M_PI /3;
-    // 4x4 Rotation Matrix for Y-axis
-    // It's the same 3x3 math, but with an extra row/col for the 4th dimension (w)
+    /*
+there are 3 predefined rotation matrices for rotation about x , y and z axes.
+here we use for the y axis , BUT this turned to 4x4 the normal one is 3x3 . 
+there are some matrix multiplication shenanigins here . 
+    */
     constexpr mat<4,4> Ry = {{
         {std::cos(a),  0, std::sin(a), 0},
         {0,            1, 0,           0},
