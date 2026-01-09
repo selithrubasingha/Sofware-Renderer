@@ -80,7 +80,7 @@ vec3 rot(vec3 v){
 
 // Accept vec4, Return vec4
 vec4 rot(vec4 v) {
-    constexpr double a = M_PI/6;
+    constexpr double a = M_PI /3;
     // 4x4 Rotation Matrix for Y-axis
     // It's the same 3x3 math, but with an extra row/col for the 4th dimension (w)
     constexpr mat<4,4> Ry = {{
@@ -90,6 +90,21 @@ vec4 rot(vec4 v) {
         {0,            0, 0,           1}
     }};
     return Ry * v;
+}
+
+vec3 persp(vec3 v) {
+    constexpr double c = 3.;
+    return v / (1-v.z/c);
+}
+
+vec4 persp(vec4 v){
+    /*
+persp? usually our eyes see close thing larger and far things smaller
+so we need to implement that in our projection . wihtout persp , the rotating would 
+still but it won't be realistic . 
+*/
+    constexpr double c=3.;
+    return v / (1 - v.z / c);
 }
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -102,9 +117,9 @@ int main(int argc, char** argv) {
     TGAImage     zbuffer(width, height, TGAImage::GRAYSCALE);
 
     for (int i=0; i<model.nfaces(); i++) { // iterate through all triangles
-        auto [ax, ay, az] = project(rot(model.vert(i, 0)));
-        auto [bx, by, bz] = project(rot(model.vert(i, 1)));
-        auto [cx, cy, cz] = project(rot(model.vert(i, 2)));
+        auto [ax, ay, az] = project(persp(rot(model.vert(i, 0))));
+        auto [bx, by, bz] = project(persp(rot(model.vert(i, 1))));
+        auto [cx, cy, cz] = project(persp(rot(model.vert(i, 2))));
         TGAColor rnd;
         for (int c=0; c<3; c++) rnd[c] = std::rand()%255;
         triangle(ax, ay, az, bx, by, bz, cx, cy, cz, zbuffer, framebuffer, rnd);
