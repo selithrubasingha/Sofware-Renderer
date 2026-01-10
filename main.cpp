@@ -13,6 +13,7 @@ IN THIS BRANCH ALL THE RASTERIZATION STUFF IN THE TUTORIAL IS COMPLETE
 constexpr int width  = 800;
 constexpr int height = 800;
 
+mat<4,4> ModelView, Viewport, Perspective;
 
 double signed_triangle_area(int ax, int ay, int bx, int by, int cx, int cy) {
     return .5*((by-ay)*(bx+ax) + (cy-by)*(cx+bx) + (ay-cy)*(ax+cx));
@@ -20,9 +21,18 @@ double signed_triangle_area(int ax, int ay, int bx, int by, int cx, int cy) {
 
 // We accept vec4, but we only use v.x and v.y. 
 std::tuple<int,int,int> project(vec4 v) { 
+    /*
+we make our 3D image inside a 2,2,2 cube area ... but the 2D screen is 800 x 800 . 
+v.x and v.y are between -1 and 1 . we add 1 so that the values are between 0 and 2
+    then we scale it to the screen size by multiplying with width/2 and height/2    
+but what's up with the 255 for v.z ?
+z is the depth value . we need to convert it to (0,255) range for the zbuffer image!
+we could even remove later in the tutorial
+    */
     return { (v.x + 1.) * width/2, 
              (v.y + 1.) * height/2,
             (v.z + 1.) *   255./2 };  }
+
 
 void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, int cz, TGAImage &zbuffer, TGAImage &framebuffer, TGAColor color) {
 
