@@ -41,6 +41,16 @@ but here we do x+w/2 ... the x+ is for generalizing the point .(x,y) is the top 
 */
     Viewport = {{{w/2., 0, 0, x+w/2.}, {0, h/2., 0, y+h/2.}, {0,0,1,0}, {0,0,0,1}}};
 }
+
+void perspective(const double f) {
+/*
+the alternative to the persp function . when the perspective matrix multiplies a vec4 [vx,vy,vz,1]
+the result is [vx, vy, vz, -vz/f + 1] . when we do the homogeneous division by w , 
+we get exactly the same result as the persp function!
+*/
+    Perspective = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0, -1/f,1}}};
+}
+
 void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, int cz, TGAImage &zbuffer, TGAImage &framebuffer, TGAColor color) {
 
      int bbminx = std::max(0, std::min(std::min(ax, bx), cx)); // bounding box for the triangle clipped by the screen
