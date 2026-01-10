@@ -33,7 +33,14 @@ we could even remove later in the tutorial
              (v.y + 1.) * height/2,
             (v.z + 1.) *   255./2 };  }
 
-
+void viewport(const int x, const int y, const int w, const int h) {
+/*
+Instead of using the project funtion . No wwe do something similar with a matrix multiplication.
+multiplying the viewport with a [vx,vy,vz,1] vector gives us the same result as the project function
+but here we do x+w/2 ... the x+ is for generalizing the point .(x,y) is the top left point . 
+*/
+    Viewport = {{{w/2., 0, 0, x+w/2.}, {0, h/2., 0, y+h/2.}, {0,0,1,0}, {0,0,0,1}}};
+}
 void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, int cz, TGAImage &zbuffer, TGAImage &framebuffer, TGAColor color) {
 
      int bbminx = std::max(0, std::min(std::min(ax, bx), cx)); // bounding box for the triangle clipped by the screen
