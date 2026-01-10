@@ -47,8 +47,25 @@ void perspective(const double f) {
 the alternative to the persp function . when the perspective matrix multiplies a vec4 [vx,vy,vz,1]
 the result is [vx, vy, vz, -vz/f + 1] . when we do the homogeneous division by w , 
 we get exactly the same result as the persp function!
+
 */
     Perspective = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0, -1/f,1}}};
+}
+
+void lookat(const vec3 eye, const vec3 center, const vec3 up) {
+/*
+OK so there is the world frame and the camera frame . the world frame center is O and has i,j,k unit vectors . 
+the camera frame center is C and has l,m,n unit vectros . The thing we need to convert the world frame
+to the camera frame coordintes . This can be done by multiplying the following matrices and it gives the x,y,z, coords
+according to the camera frame . There are some hard mathematics regarding this you can read the documentation for further info . 
+
+ website - https://haqr.eu/tinyrenderer/camera/
+*/
+    vec3 n = normalized(eye-center);
+    vec3 l = normalized(cross(up,n));
+    vec3 m = normalized(cross(n, l));
+    ModelView = mat<4,4>{{{l.x,l.y,l.z,0}, {m.x,m.y,m.z,0}, {n.x,n.y,n.z,0}, {0,0,0,1}}} *
+                mat<4,4>{{{1,0,0,-center.x}, {0,1,0,-center.y}, {0,0,1,-center.z}, {0,0,0,1}}};
 }
 
 void triangle(int ax, int ay, int az, int bx, int by, int bz, int cx, int cy, int cz, TGAImage &zbuffer, TGAImage &framebuffer, TGAColor color) {
