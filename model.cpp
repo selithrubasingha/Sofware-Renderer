@@ -15,7 +15,7 @@ Model::Model(const std::string filename) {
         char trash;
         if (!line.compare(0, 2, "v ")) {
             iss >> trash;
-            vec4 v;
+            vec3 v;
             for (int i : {0,1,2}) iss >> v[i];
             verts.push_back(v);
         } else if (!line.compare(0, 2, "f ")) {
@@ -39,11 +39,11 @@ Model::Model(const std::string filename) {
 int Model::nverts() const { return verts.size(); }
 int Model::nfaces() const { return facet_vrt.size()/3; }
 
-vec4 Model::vert(const int i) const {
+vec3 Model::vert(const int i) const {
     return verts[i];
 }
 
-vec4 Model::vert(const int iface, const int nthvert) const {
+vec3 Model::vert(const int iface, const int nthvert) const {
     return verts[facet_vrt[iface*3+nthvert]];
 }
 
