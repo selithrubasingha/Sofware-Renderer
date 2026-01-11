@@ -47,6 +47,14 @@ we get exactly the same result as the persp function!
 }
 
 void rasterize(const vec4 clip[3], std::vector<double> &zbuffer, TGAImage &framebuffer, const TGAColor color) {
+/*
+Summary of the Flow
+clip: Where is the triangle in 3D space? (4D inputs)
+.ndc: Squish it into a standard $1\times1$ box (Divide by W)
+.screen: Scale it to the image size (Pixels).
+ABC/bc: For every single pixel in the box, ask: "Am I inside the triangle?"
+zbuffer: If inside, am I closer to the camera than what was drawn before?
+*/
     vec4 ndc[3]    = { clip[0]/clip[0].w, clip[1]/clip[1].w, clip[2]/clip[2].w };                // normalized device coordinates
     vec2 screen[3] = { (Viewport*ndc[0]).xy(), (Viewport*ndc[1]).xy(), (Viewport*ndc[2]).xy() }; // screen coordinates
 
@@ -77,7 +85,7 @@ int main(int argc, char** argv) {
 
     constexpr int width  = 800;    // output image size
     constexpr int height = 800;
-    constexpr vec3    eye{-1,0,2}; // camera position
+    constexpr vec3    eye{-1,5,2}; // camera position
     constexpr vec3 center{0,0,0};  // camera direction
     constexpr vec3     up{0,1,0};  // camera up vector
 
