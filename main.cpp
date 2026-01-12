@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
     constexpr vec3    eye{-1, 0, 2}; // camera position
     constexpr vec3 center{ 0, 0, 0}; // camera direction
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
+    constexpr vec3 light{-1,-1,-1};
 
     lookat(eye, center, up);                                   // build the ModelView   matrix
     init_perspective(norm(eye-center));                        // build the Perspective matrix
@@ -50,11 +51,21 @@ int main(int argc, char** argv) {
     for (int m=1; m<argc; m++) {                    // iterate through all input objects
         Model model(argv[m]);                       // load the data
         RandomShader shader(model);
-        for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
+        for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
+
+            vec3 v0 = model.vert(f, 0);
+            vec3 v1 = model.vert(f, 1);
+            vec3 v2 = model.vert(f, 2);
+
+            vec3 edge1 = v1-v0;
+            vec3 edge2 = v2-v0;
+            vec3 n =normalized(cross(edge1,edge2));
+            vec3 l = normalized(light);
+            double intensity = std::max(0.,(n*l));
             shader.color = { 
-                (unsigned char)(std::rand() % 255), 
-                (unsigned char)(std::rand() % 255), 
-                (unsigned char)(std::rand() % 255), 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
                 255 
             };
             Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
