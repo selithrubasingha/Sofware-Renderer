@@ -10,6 +10,7 @@ extern std::vector<double> zbuffer;     // the depth buffer
 struct RandomShader : IShader {
     const Model &model;
     TGAColor color = {};
+    
     vec3 tri[3];  // triangle in eye coordinates
 
     RandomShader(const Model &m) : model(m) {
@@ -40,6 +41,8 @@ int main(int argc, char** argv) {
     constexpr vec3    eye{-1, 0, 2}; // camera position
     constexpr vec3 center{ 0, 0, 0}; // camera direction
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
+    constexpr vec3 light{1,1,1};
+    
 
     lookat(eye, center, up);                                   // build the ModelView   matrix
     init_perspective(norm(eye-center));                        // build the Perspective matrix
@@ -50,16 +53,35 @@ int main(int argc, char** argv) {
     for (int m=1; m<argc; m++) {                    // iterate through all input objects
         Model model(argv[m]);                       // load the data
         RandomShader shader(model);
-        for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
-            shader.color = { 
-                (unsigned char)(std::rand() % 255), 
-                (unsigned char)(std::rand() % 255), 
-                (unsigned char)(std::rand() % 255), 
-                255 
-            };
+        for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
+
+            vec3 v0 = model.vert(f, 0);
+            vec3 v1 = model.vert(f, 1);
+            vec3 v2 = model.vert(f, 2);
+
+            vec3 edge1 = v1-v0;
+            vec3 edge2 = v2-v0;
+            vec3 n =normalized(cross(edge1,edge2));
+            vec3 l = normalized(light);
+            double diffuse_intensity = std::max(0.,(n*l));
+            double ambient_intensity = 0.2;
+            double specular_intensity = std::pow(diffuse_intensity,16);
+            double intensity = ambient_intensity + diffuse_intensity + specular_intensity;
+
+            if (intensity >= 1) intensity = 1.0;
+
             Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
                               shader.vertex(f, 1),
                               shader.vertex(f, 2) };
+            
+            shader.color = { 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
+                255 
+            };
+
+            
             rasterize(clip, shader, framebuffer);   // rasterize the primitive
 
         }
