@@ -9,11 +9,12 @@ extern std::vector<double> zbuffer;     // the depth buffer
 
 struct RandomShader : IShader {
     const Model &model;
+    const vec3 l; // light direction in eye coordinates
     TGAColor color = {};
     
     vec3 tri[3];  // triangle in eye coordinates
 
-    RandomShader(const Model &m) : model(m) {
+    RandomShader(const Model &m , const vec3 &l) : model(m), l(l) {
         }
 
     virtual vec4 vertex(const int face, const int vert) {
@@ -24,7 +25,16 @@ struct RandomShader : IShader {
     }
 
     virtual std::pair<bool,TGAColor> fragment(const vec3 bar) const {
-        return {false, color};                     
+        TGAColor gl_FragColor = {255, 255, 255, 255};             // output color of the fragment
+        vec3 n = normalized(cross(tri[1]-tri[0], tri[2]-tri[0])); // triangle normal in eye coordinates
+        vec3 r = normalized(n * (n * l)*2 - l);                   // reflected light direction
+        double ambient = .3;                                      // ambient light intensity
+        double diff = std::max(0., n * l);                        // diffuse light intensity
+        double spec = std::pow(std::max(r.z, 0.), 35);            // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
+        for (int channel : {0,1,2}){
+            gl_FragColor[channel] *= std::min(1., ambient + .75*diff);
+            gl_FragColor[channel] *= std::min(1., ambient + .4*diff + .9*spec);}
+        return {false, gl_FragColor};                          
     }
 
 };
@@ -42,6 +52,7 @@ int main(int argc, char** argv) {
     constexpr vec3 center{ 0, 0, 0}; // camera direction
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
     constexpr vec3 light{1,1,1};
+    vec3 l = normalized(light);
     
 
     lookat(eye, center, up);                                   // build the ModelView   matrix
@@ -52,23 +63,15 @@ int main(int argc, char** argv) {
 
     for (int m=1; m<argc; m++) {                    // iterate through all input objects
         Model model(argv[m]);                       // load the data
-        RandomShader shader(model);
+        RandomShader shader(model,l);
         for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
 
-            vec3 v0 = model.vert(f, 0);
-            vec3 v1 = model.vert(f, 1);
-            vec3 v2 = model.vert(f, 2);
+            
+            
 
-            vec3 edge1 = v1-v0;
-            vec3 edge2 = v2-v0;
-            vec3 n =normalized(cross(edge1,edge2));
-            vec3 l = normalized(light);
-            double diffuse_intensity = std::max(0.,(n*l));
-            double ambient_intensity = 0.2;
-            double specular_intensity = std::pow(diffuse_intensity,16);
-            double intensity = ambient_intensity + diffuse_intensity + specular_intensity;
+            double intensity = 0.2;
 
-            if (intensity >= 1) intensity = 1.0;
+            
 
             Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
                               shader.vertex(f, 1),
