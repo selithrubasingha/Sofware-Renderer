@@ -1,0 +1,322 @@
+# Blender 3.6.7 MTL File: 'None'
+# www.blender.org
+
+newmtl Anklet
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Armlet
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Blush
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/blush.png
+map_d textures/blush.png
+
+newmtl Blush_2
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/blush_2.png
+map_d textures/blush_2.png
+
+newmtl Blush_3
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/blush_3.png
+map_d textures/blush_3.png
+
+newmtl Body
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/skin.png
+map_d textures/skin.png
+
+newmtl Bottom
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Brow
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/brows.png
+map_d textures/brows.png
+
+newmtl Depressed
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/depressed.png
+map_d textures/depressed.png
+
+newmtl Eye
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/eyes.png
+map_d textures/eyes.png
+
+newmtl Eyeline
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/eyeliner.png
+map_d textures/eyeliner.png
+
+newmtl Eyewhite
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/eyewhite.png
+map_d textures/eyewhite.png
+
+newmtl Face
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/face.png
+map_d textures/face.png
+
+newmtl Face_Veil
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Hair_Ahoge
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/hair.png
+map_d textures/hair.png
+
+newmtl Hair_Back
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/hair.png
+map_d textures/hair.png
+
+newmtl Hair_Front
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/hair.png
+map_d textures/hair.png
+
+newmtl Hair_Side
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/hair.png
+map_d textures/hair.png
+
+newmtl Hairmain
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/hair_main.png
+map_d textures/hair_main.png
+
+newmtl Highlight
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/highlights.png
+map_d textures/highlights.png
+
+newmtl Jewels_Bottom
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980392 0.925490 0.992157
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Jewels_Feet
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980392 0.925490 0.992157
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Jewels_Skirt
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980392 0.925490 0.992157
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Jewels_Top
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980392 0.925490 0.992157
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Jewels_Veil
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980392 0.925490 0.992157
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Mouth
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/mouth.png
+map_d textures/mouth.png
+
+newmtl Skirt
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Skirt_Acc
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Skirt_Gold
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Tears
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.886275 0.972549 0.980392
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Top
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
+
+newmtl Top_Acc
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/belly_dancer.png
+map_d textures/belly_dancer.png
