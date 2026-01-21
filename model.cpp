@@ -18,6 +18,19 @@ Model::Model(const std::string filename) {
             vec3 v;
             for (int i : {0,1,2}) iss >> v[i];
             verts.push_back(v);
+        }else if (!line.compare(0, 3, "vn ")) {
+/*
+Here the vn represents the normal vector set(list) . How the accessing of the the vectors is not relavent 
+this only stores a bunch of vectors --> vn -1 0 1
+we make a vec4 and then store it in the norms vector after normalizing it!
+*/
+            iss>> trash >> trash;
+            vec4 n;
+            for (int i : {0,1,2}){
+                iss >> n[i];
+            }
+
+            norms.push_back(normalized(n));
         } else if (!line.compare(0, 2, "f ")) {
             int f,t,n, cnt = 0;
             iss >> trash;
