@@ -68,6 +68,14 @@ vec3 Model::vert(const int iface, const int nthvert) const {
     return verts[facet_vrt[iface*3+nthvert]];
 }
 
+/* 
+This is a member function in C++ 
+I think it returns correctly the normal vector when th eiface and the nthvert is given 
+*/
+vec4 Model::normal(const int iface, const int nthvert) const {
+    return norms[facet_nrm[iface*3+ nthvert]];
+}
+
 
 
 // #include <fstream>
