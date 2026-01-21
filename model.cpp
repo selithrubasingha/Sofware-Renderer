@@ -25,7 +25,7 @@ this only stores a bunch of vectors --> vn -1 0 1
 we make a vec4 and then store it in the norms vector after normalizing it!
 */
             iss>> trash >> trash;
-            vec4 n;
+            vec3 n;
             for (int i : {0,1,2}){
                 iss >> n[i];
             }
@@ -72,7 +72,7 @@ vec3 Model::vert(const int iface, const int nthvert) const {
 This is a member function in C++ 
 I think it returns correctly the normal vector when th eiface and the nthvert is given 
 */
-vec4 Model::normal(const int iface, const int nthvert) const {
+vec3 Model::normal(const int iface, const int nthvert) const {
     return norms[facet_nrm[iface*3+ nthvert]];
 }
 
