@@ -36,6 +36,14 @@ we make a vec4 and then store it in the norms vector after normalizing it!
             iss >> trash;
             while (iss >> f >> trash >> t >> trash >> n) {
                 facet_vrt.push_back(--f);
+                //facet norm?
+/*
+Ok so f 6/4/1 3/5/3 7/6/5 : This means ...
+The triangle verrtices are 6,3,7 th vertices in the edgevertices list ...
+and 1,3,5 are the normal vectors for these vertices !!...
+yet to discover what the middle stuff are ...
+*/
+                facet_nrm.push_back(--n);
                 cnt++;
             }
             if (3!=cnt) {
