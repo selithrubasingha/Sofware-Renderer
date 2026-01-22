@@ -45,6 +45,7 @@ we make a vec4 and then store it in the norms vector after normalizing it!
             iss >> trash;
             while (iss >> f >> trash >> t >> trash >> n) {
                 facet_vrt.push_back(--f);
+                facet_tex.push_back(--t);
 
                 //facet norm?
 /*
@@ -86,6 +87,9 @@ vec3 Model::normal(const int iface, const int nthvert) const {
     return norms[facet_nrm[iface*3+ nthvert]];
 }
 
+vec2 Model::uv(const int iface, const int nthvert) const {
+    return tex[facet_tex[iface*3+nthvert]];
+}
 
 
 // #include <fstream>

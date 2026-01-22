@@ -12,6 +12,7 @@ struct RandomShader : IShader {
     const Model &model;
     const vec3 l; // light direction in eye coordinates
     vec3 varying_nrm[3]; // normal per vertex to be interpolated by the fragment shader
+    vec3 varying_uv[3];  // uv per vertex to be interpolated by the fragment shader
     TGAColor color = {};
     
     vec3 tri[3];  // triangle in eye coordinates
@@ -23,6 +24,7 @@ struct RandomShader : IShader {
         vec3 v = model.vert(face, vert);                          // current vertex in object coordinates
         vec3 n = model.normal(face, vert);
         varying_nrm[vert] = (ModelView.invert_transpose() * vec4{n.x, n.y, n.z, 0.}).xyz();
+        varying_uv[vert]  = model.uv(face,vert);
         vec4 gl_Position = ModelView * vec4{v.x, v.y, v.z, 1.};
         tri[vert] = gl_Position.xyz();                            // in eye coordinates
         return Perspective * gl_Position;                         // in clip coordinates                       // in clip coordinates
@@ -36,6 +38,9 @@ struct RandomShader : IShader {
                             varying_nrm[2] * bar[2]);             // per-vertex normal interpolation                 // reflected light direction
 
         // ADD THIS LINE
+        vec2 uv = (varying_uv[0] * bar[0] +
+                  varying_uv[1] * bar[1] +
+                  varying_uv[2] * bar[2]);
 vec3    r = normalized(n * (n * l) * 2. - l);
         double ambient = .3;                                      // ambient light intensity
         double diff = std::max(0., n * l);                        // diffuse light intensity
