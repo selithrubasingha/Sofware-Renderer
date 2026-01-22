@@ -39,7 +39,10 @@ struct RandomShader : IShader {
         int v_diff = uv.y * diffusemap.height();
         TGAColor base_color = diffusemap.get(u_diff, v_diff);
 
-        
+        const TGAImage& specmap = model.specular(); 
+        int u_spec = uv.x * specmap.width();
+        int v_spec = uv.y * specmap.height();
+        double specular_intensity = specmap.get(u_spec, v_spec)[0];
 
 
 
@@ -51,9 +54,15 @@ struct RandomShader : IShader {
         double diff = std::max(0., n * l);                        // diffuse light intensity
         double spec = std::pow(std::max(r.z, 0.), 35);            // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
         for (int channel : {0,1,2}){
-            gl_FragColor[channel] *= std::min(1., ambient + .75*diff);
-            gl_FragColor[channel] *= std::min(1., ambient + .4*diff + .9*spec);}
-        return {false, gl_FragColor};                          
+            double color_part = base_color[channel] * (ambient + diff);
+
+            double shine_part = 0.6 * spec * specular_intensity;
+
+            double result = color_part + shine_part;
+
+            gl_FragColor[channel] = std::min(255., result);}
+        
+    return {false, gl_FragColor};
     }
 
 };

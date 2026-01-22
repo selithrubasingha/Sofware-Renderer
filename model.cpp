@@ -80,5 +80,5 @@ vec2 Model::uv(const int iface, const int nthvert) const {
 }
 
 const TGAImage& Model::diffuse()  const { return diffusemap;  }
-// const TGAImage& Model::specular() const { return specularmap; }
+const TGAImage& Model::specular() const { return specularmap; }
 
