@@ -31,11 +31,21 @@ we make a vec4 and then store it in the norms vector after normalizing it!
             }
 
             norms.push_back(normalized(n));
+        } else if (!line.compare(0, 3, "vt ")) {
+            //dump>>v>>t
+            iss >> trash >> trash;
+            vec2 uv;
+            for (int i : {0,1}) iss >> uv[i];
+            /*
+            why 1-uv.y ? for math people (0,0) is bottom left but for images its top left!
+            */
+            tex.push_back({uv.x, 1-uv.y});
         } else if (!line.compare(0, 2, "f ")) {
             int f,t,n, cnt = 0;
             iss >> trash;
             while (iss >> f >> trash >> t >> trash >> n) {
                 facet_vrt.push_back(--f);
+
                 //facet norm?
 /*
 Ok so f 6/4/1 3/5/3 7/6/5 : This means ...
