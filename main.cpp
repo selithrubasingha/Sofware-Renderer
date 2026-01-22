@@ -33,6 +33,16 @@ struct RandomShader : IShader {
         vec2 uv = (varying_uv[0] * bar[0] +
                   varying_uv[1] * bar[1] +
                   varying_uv[2] * bar[2]);
+        
+        const TGAImage& diffusemap = model.diffuse();
+        int u_diff = uv.x * diffusemap.width();
+        int v_diff = uv.y * diffusemap.height();
+        TGAColor base_color = diffusemap.get(u_diff, v_diff);
+
+        
+
+
+
         vec4 n = normalized(ModelView.invert_transpose() * model.normal(uv));
         vec4 r = normalized(n * (n * l)*2 - l);                   // reflected light direction
         

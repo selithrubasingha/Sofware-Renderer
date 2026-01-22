@@ -50,9 +50,9 @@ Model::Model(const std::string filename) {
         std::string texfile = filename.substr(0,dot) + suffix;
         std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
     };
-    // load_texture("_diffuse.tga",    diffusemap );
+    load_texture("_diffuse.tga",    diffusemap );
     load_texture("_nm.tga", normalmap);
-    // load_texture("_spec.tga",       specularmap);
+    load_texture("_spec.tga",       specularmap);
 }
 
 int Model::nverts() const { return verts.size(); }
@@ -79,6 +79,6 @@ vec2 Model::uv(const int iface, const int nthvert) const {
     return tex[facet_tex[iface*3+nthvert]];
 }
 
-// const TGAImage& Model::diffuse()  const { return diffusemap;  }
+const TGAImage& Model::diffuse()  const { return diffusemap;  }
 // const TGAImage& Model::specular() const { return specularmap; }
 
