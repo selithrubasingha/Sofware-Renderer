@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     constexpr int height = 800;
 
     constexpr vec3    eye{0, 1, 2}; // camera position
-    constexpr vec3 center{ 0, 1, 0}; // camera direction
+    constexpr vec3 center{ 0, 0, 0}; // camera direction
     // constexpr vec3 center{ 0, 0, 0}; // camera direction
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
     constexpr vec3 light{1,1,1};
