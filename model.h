@@ -23,6 +23,9 @@ public:
     vec2 uv(const int iface, const int nthvert) const;     // uv coordinates of triangle corners
     const TGAImage& diffuse()  const;
     const TGAImage& specular() const;
+    bool has_normal() const;
+    bool has_specular() const;
+
 
 };
 
