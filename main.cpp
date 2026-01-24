@@ -4,7 +4,7 @@
 #include <algorithm> 
 using namespace std;
 
-
+/// saving the colored image work
 extern mat<4,4> ModelView, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
 
