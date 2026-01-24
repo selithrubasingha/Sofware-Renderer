@@ -53,8 +53,8 @@ Model::Model(const std::string filename) {
  
     };
     load_texture("_diffuse.tga",    diffusemap );
-    // load_texture("_nm.tga", normalmap);
-    // load_texture("_spec.tga",       specularmap);
+    load_texture("_nm.tga", normalmap);
+    load_texture("_spec.tga",       specularmap);
 
     
 }
@@ -86,6 +86,3 @@ vec2 Model::uv(const int iface, const int nthvert) const {
 const TGAImage& Model::diffuse()  const { return diffusemap;  }
 const TGAImage& Model::specular() const { return specularmap; }
 
-// In model.h / model.cpp
-bool Model::has_specular() const { return specularmap.width() > 0; }
-bool Model::has_normal() const   { return normalmap.width() > 0; }
