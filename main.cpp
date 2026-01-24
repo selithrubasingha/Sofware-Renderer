@@ -94,7 +94,7 @@ struct RandomShader : IShader {
         specular_intensity = model.specular().get(u_spec, v_spec)[0];
     } else {
         // FALLBACK: If no map, assume a constant shine (e.g., skin/cloth usually has some specularity)
-        specular_intensity = 10.0; 
+        specular_intensity = 0.0; 
     }
 
     // 2. Normal Mapping Fallback
@@ -113,7 +113,7 @@ struct RandomShader : IShader {
 
     vec4 r = normalized(n * (n * l)*2.0 - l);  
 
-    double ambient = .3;                                      // ambient light intensity
+    double ambient = .1;                                      // ambient light intensity
     double diff = std::max(0., n * l);                        // diffuse light intensity
     double spec = std::pow(std::max(r.z, 0.), 35);            // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
     for (int channel : {0,1,2}){

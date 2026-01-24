@@ -27,6 +27,7 @@ Model::Model(const std::string filename) {
             iss >> trash >> trash;
             vec2 uv;
             for (int i : {0,1}) iss >> uv[i];
+            // tex.push_back({uv.x, 1-uv.y});
             tex.push_back({uv.x, 1-uv.y});
         } else if (!line.compare(0, 2, "f ")) {
             int f,t,n, cnt = 0;
