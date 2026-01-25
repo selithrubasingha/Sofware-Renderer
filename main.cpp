@@ -89,8 +89,10 @@ struct RandomShader : IShader {
         TBN[3] = vec3{0, 0, 0};
 
 
+        vec3 n_local = model.normal(uv).xyz();
 
-        
+        vec4 bn = normalized(TBN * n_local);
+
         
 
         
@@ -108,12 +110,11 @@ struct RandomShader : IShader {
 
 
 
-        vec4 n = normalized(ModelView.invert_transpose() * model.normal(uv));
-        vec4 r = normalized(n * (n * l)*2 - l);                   // reflected light direction
+        vec4 r = normalized(bn * (bn * l)*2 - l);                   // reflected light direction
         
         
         double ambient = .3;                                      // ambient light intensity
-        double diff = std::max(0., n * l);                        // diffuse light intensity
+        double diff = std::max(0., bn * l);                        // diffuse light intensity
         double spec = std::pow(std::max(r.z, 0.), 35);            // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
         for (int channel : {0,1,2}){
             double color_part = base_color[channel] * (ambient + diff);
