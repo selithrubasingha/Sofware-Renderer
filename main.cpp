@@ -5,7 +5,7 @@
 using namespace std;
 
 /// saving the colored image work
-extern mat<4,4> ModelView, Perspective; // "OpenGL" state matrices and
+extern mat<4,4> ModelView,Viewport, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
 extern std::vector<double> shadowbuffer; // the shadow buffer
 
@@ -38,6 +38,10 @@ struct RandomShader : IShader {
     vec4 varying_nrm[3]; // triangle normal coordinates, written by the vertex shader, read by the fragment shader
     vec4 tri[3]; //triangle in view coordinates . 
     TGAColor color = {};
+
+    mat<4,4> shadow_M;
+    std::vector<double> shadow_map; // The depth map
+    vec4 varying_shadow_coord[3];
     
 
 
@@ -48,7 +52,7 @@ struct RandomShader : IShader {
     virtual vec4 vertex(const int face, const int vert) {
         varying_uv[vert] = model.uv(face, vert);
         varying_nrm[vert] = ModelView.invert_transpose() * model.normal(face, vert);
-
+        varying_shadow_coord[vert] = shadow_M * model.vert(face, vert);
         /*
         GL position is ::"Where this point is relative to the camera."
         You are using it as a temporary variable to hold the vertex after the camera moved it, but before the perspective squashed it
@@ -127,40 +131,46 @@ int main(int argc, char** argv) {
         }
     }
 
-    // lookat(eye, center, up);                                   // build the ModelView   matrix
-    // init_perspective(norm(eye-center));                        // build the Perspective matrix
-    // init_viewport(width/16, height/16, width*7/8, height*7/8); // build the Viewport    matrix
-    // init_zbuffer(width, height);
+    mat<4,4> M = Viewport * Perspective * ModelView;
+
+
+    lookat(eye, center, up);                                   // build the ModelView   matrix
+    init_perspective(norm(eye-center));                        // build the Perspective matrix
+    init_viewport(width/16, height/16, width*7/8, height*7/8); // build the Viewport    matrix
+    init_zbuffer(width, height);
     // TGAImage framebuffer(width, height, TGAImage::RGB, {177, 195, 209, 255});
 
-    // for (int m=1; m<argc; m++) {                    // iterate through all input objects
-    //     Model model(argv[m]);                       // load the data
-    //     RandomShader shader(light,model);
-    //     for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
+    for (int m=1; m<argc; m++) {                    // iterate through all input objects
+        Model model(argv[m]);                       // load the data
+        RandomShader shader(light,model);
+        shader.shadow_M = M;          // <--- Pass the Matrix we calculated!
+        shader.shadow_map = shadowbuffer;
+
+        for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
 
             
             
 
-    //         double intensity = 0.2;
+            double intensity = 0.2;
 
             
 
-    //         Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
-    //                           shader.vertex(f, 1),
-    //                           shader.vertex(f, 2) };
+            Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
+                              shader.vertex(f, 1),
+                              shader.vertex(f, 2) };
             
-    //         shader.color = { 
-    //             (unsigned char)(intensity * 255), 
-    //             (unsigned char)(intensity * 255), 
-    //             (unsigned char)(intensity * 255), 
-    //             255 
-    //         };
+            shader.color = { 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
+                (unsigned char)(intensity * 255), 
+                255 
+            };
 
             
-    //         rasterize(clip, shader, framebuffer);   // rasterize the primitive
+            rasterize(clip, shader, framebuffer);   // rasterize the primitive
 
-    //     }
-    // }
+        }
+    }
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
