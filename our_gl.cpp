@@ -3,6 +3,8 @@
 
 mat<4,4> ModelView, Viewport, Perspective; // "OpenGL" state matrices
 std::vector<double> zbuffer;               // depth buffer
+#include <vector> // Make sure you have this
+std::vector<double> shadowbuffer;
 
 void lookat(const vec3 eye, const vec3 center, const vec3 up) {
 /*

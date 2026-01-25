@@ -30,6 +30,7 @@ struct DepthShader :IShader{
         return {false, color};
     }
 };
+
 struct RandomShader : IShader {
     const Model &model;
     vec4 l;
@@ -101,42 +102,65 @@ int main(int argc, char** argv) {
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
     constexpr vec3 light{1,1,1};
     
-    
+    shadowbuffer.resize(width * height);
+    std::fill(shadowbuffer.begin(), shadowbuffer.end(), -std::numeric_limits<double>::max());
 
-    lookat(eye, center, up);                                   // build the ModelView   matrix
-    init_perspective(norm(eye-center));                        // build the Perspective matrix
-    init_viewport(width/16, height/16, width*7/8, height*7/8); // build the Viewport    matrix
+
+    lookat(light, center, up);                                   
+    init_perspective(norm(light-center));
+    init_viewport(width/16, height/16, width*7/8, height*7/8);
     init_zbuffer(width, height);
     TGAImage framebuffer(width, height, TGAImage::RGB, {177, 195, 209, 255});
 
+    std::fill(shadowbuffer.begin(), shadowbuffer.end(), -99999);
+
+    
+
     for (int m=1; m<argc; m++) {                    // iterate through all input objects
         Model model(argv[m]);                       // load the data
-        RandomShader shader(light,model);
+        DepthShader depthshader(model);
         for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
-
-            
-            
-
-            double intensity = 0.2;
-
-            
-
-            Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
-                              shader.vertex(f, 1),
-                              shader.vertex(f, 2) };
-            
-            shader.color = { 
-                (unsigned char)(intensity * 255), 
-                (unsigned char)(intensity * 255), 
-                (unsigned char)(intensity * 255), 
-                255 
-            };
-
-            
-            rasterize(clip, shader, framebuffer);   // rasterize the primitive
-
+            Triangle clip = { depthshader.vertex(f, 0),  // assemble the primitive
+                              depthshader.vertex(f, 1),
+                              depthshader.vertex(f, 2) };
+            rasterize(clip, depthshader, framebuffer);   // rasterize the primitive
         }
     }
+
+    // lookat(eye, center, up);                                   // build the ModelView   matrix
+    // init_perspective(norm(eye-center));                        // build the Perspective matrix
+    // init_viewport(width/16, height/16, width*7/8, height*7/8); // build the Viewport    matrix
+    // init_zbuffer(width, height);
+    // TGAImage framebuffer(width, height, TGAImage::RGB, {177, 195, 209, 255});
+
+    // for (int m=1; m<argc; m++) {                    // iterate through all input objects
+    //     Model model(argv[m]);                       // load the data
+    //     RandomShader shader(light,model);
+    //     for (int f=0; f<model.nfaces(); f++) { // iterate through all facets
+
+            
+            
+
+    //         double intensity = 0.2;
+
+            
+
+    //         Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
+    //                           shader.vertex(f, 1),
+    //                           shader.vertex(f, 2) };
+            
+    //         shader.color = { 
+    //             (unsigned char)(intensity * 255), 
+    //             (unsigned char)(intensity * 255), 
+    //             (unsigned char)(intensity * 255), 
+    //             255 
+    //         };
+
+            
+    //         rasterize(clip, shader, framebuffer);   // rasterize the primitive
+
+    //     }
+    // }
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
