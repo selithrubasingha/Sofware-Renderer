@@ -36,94 +36,28 @@ struct RandomShader : IShader {
     }
 
     virtual std::pair<bool,TGAColor> fragment(const vec3 bar) const {
-        TGAColor gl_FragColor = {255, 255, 255, 255};             // output color of the fragment
 
-        vec2 uv = (varying_uv[0] * bar[0] +
-                  varying_uv[1] * bar[1] +
-                  varying_uv[2] * bar[2]);
+        mat<2,4> E = { tri[1]-tri[0], tri[2]-tri[0] };
+        mat<2,2> U = { varying_uv[1]-varying_uv[0], varying_uv[2]-varying_uv[0] };
+        mat<2,4> T = U.invert() * E;
+        mat<4,4> D = {normalized(T[0]),  // tangent vector
+                      normalized(T[1]),  // bitangent vector
+                      normalized(varying_nrm[0]*bar[0] + varying_nrm[1]*bar[1] + varying_nrm[2]*bar[2]), // interpolated normal
+                      {0,0,0,1}}; // Darboux frame
 
-        /*
-        Calculation of the TBN matrix!
-        */
+        vec2 uv = (varying_uv[0] * bar[0] + varying_uv[1] * bar[1] + varying_uv[2] * bar[2]);
 
-        vec4 e1 = tri[1] - tri[0];
-        vec4 e2 = tri[2] - tri[0];
-
-        mat<4,2> E ;
-
-        E[0] = vec2{e1.x, e2.x};
-        E[1] = vec2{e1.y, e2.y};
-        E[2] = vec2{e1.z, e2.z};
-        E[3] = vec2{e1.w, e2.w};
-
-        vec2 uv_diff1 = varying_uv[1] - varying_uv[0];
-        vec2 uv_diff2 = varying_uv[2] - varying_uv[0];
-
-        mat<2,2> U;
-        U[0] = vec2{uv_diff1.x, uv_diff2.x};
-        U[1] = vec2{uv_diff1.y, uv_diff2.y};
-
-        // Invert U and multiply to get Tangent (T) and Bitangent (B)
-        mat<4,2> tb = E * U.invert();
-
-        mat<4,3> TBN;
-
-        vec4 n = varying_nrm[0]*bar[0] + varying_nrm[1]*bar[1] + varying_nrm[2]*bar[2];
-        n = normalized(n);
-
-                // Normalize T and B (Crucial for lighting!)
-        vec4 T = normalized(vec4{tb[0][0], tb[1][0], tb[2][0], 0});
-        vec4 B = normalized(vec4{tb[0][1], tb[1][1], tb[2][1], 0});
-
-        // Fill the TBN Matrix (4 Rows, 3 Columns)
-        // Row 0 (X components)
-        TBN[0] = vec3{T.x, B.x, n.x};
-
-        // Row 1 (Y components)
-        TBN[1] = vec3{T.y, B.y, n.y};
-
-        // Row 2 (Z components)
-        TBN[2] = vec3{T.z, B.z, n.z};
-
-        // Row 3 (W components - usually 0 for direction vectors)
-        TBN[3] = vec3{0, 0, 0};
+        vec4 n = normalized(D.transpose() * model.normal(uv));
 
 
-        vec3 n_local = model.normal(uv).xyz();
-
-        vec4 bn = normalized(TBN * n_local);
-
-        
-
-        
-
-        
-        const TGAImage& diffusemap = model.diffuse();
-        int u_diff = uv.x * diffusemap.width();
-        int v_diff = uv.y * diffusemap.height();
-        TGAColor base_color = diffusemap.get(u_diff, v_diff);
-
-        const TGAImage& specmap = model.specular(); 
-        int u_spec = uv.x * specmap.width();
-        int v_spec = uv.y * specmap.height();
-        double specular_intensity = specmap.get(u_spec, v_spec)[0];
-
-
-
-        vec4 r = normalized(bn * (bn * l)*2 - l);                   // reflected light direction
-        
-        
-        double ambient = .3;                                      // ambient light intensity
-        double diff = std::max(0., bn * l);                        // diffuse light intensity
-        double spec = std::pow(std::max(r.z, 0.), 35);            // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
+        vec4 r = normalized(n * (n * l)*2 - l);                   // reflected light direction
+        double ambient  = .4;                                     // ambient light intensity
+        double diffuse  = 1.*std::max(0., n * l);                 // diffuse light intensity
+        double specular = (3.*sample2D(model.specular(), uv)[0]/255.) * std::pow(std::max(r.z, 0.), 35);  // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
+        TGAColor gl_FragColor = sample2D(model.diffuse(), uv);          // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
         for (int channel : {0,1,2}){
-            double color_part = base_color[channel] * (ambient + diff);
-
-            double shine_part = 0.6 * spec * specular_intensity;
-
-            double result = color_part + shine_part;
-
-            gl_FragColor[channel] = std::min(255., result);}
+            gl_FragColor[channel] = std::min<int>(255, gl_FragColor[channel]*(ambient + diffuse + specular));
+        }
         
     return {false, gl_FragColor};
     }
