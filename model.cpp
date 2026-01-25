@@ -53,7 +53,7 @@ Model::Model(const std::string filename) {
  
     };
     load_texture("_diffuse.tga",    diffusemap );
-    load_texture("_nm.tga", normalmap);
+    load_texture("_nm_tangent.tga", normalmap);
     load_texture("_spec.tga",       specularmap);
 
     
