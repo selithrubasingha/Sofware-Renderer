@@ -12,7 +12,8 @@ struct RandomShader : IShader {
     const Model &model;
     vec4 l;
     vec2 varying_uv[3];  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
-
+    vec4 varying_nrm[3]; // triangle normal coordinates, written by the vertex shader, read by the fragment shader
+    vec4 tri[3]; //triangle in view coordinates . 
     TGAColor color = {};
     
 
@@ -23,7 +24,14 @@ struct RandomShader : IShader {
 
     virtual vec4 vertex(const int face, const int vert) {
         varying_uv[vert] = model.uv(face, vert);
+        varying_nrm[vert] = ModelView.invert_transpose() * model.normal(face, vert);
+
+        /*
+        GL position is ::"Where this point is relative to the camera."
+        You are using it as a temporary variable to hold the vertex after the camera moved it, but before the perspective squashed it
+        */
         vec4 gl_Position = ModelView * model.vert(face, vert);
+        tri[vert] = gl_Position;                                   // triangle in view coordinates
         return Perspective * gl_Position;                         // in clip coordinates                       // in clip coordinates
     }
 
@@ -33,6 +41,60 @@ struct RandomShader : IShader {
         vec2 uv = (varying_uv[0] * bar[0] +
                   varying_uv[1] * bar[1] +
                   varying_uv[2] * bar[2]);
+
+        /*
+        Calculation of the TBN matrix!
+        */
+
+        vec4 e1 = tri[1] - tri[0];
+        vec4 e2 = tri[2] - tri[0];
+
+        mat<4,2> E ;
+
+        E[0] = vec2{e1.x, e2.x};
+        E[1] = vec2{e1.y, e2.y};
+        E[2] = vec2{e1.z, e2.z};
+        E[3] = vec2{e1.w, e2.w};
+
+        vec2 uv_diff1 = varying_uv[1] - varying_uv[0];
+        vec2 uv_diff2 = varying_uv[2] - varying_uv[0];
+
+        mat<2,2> U;
+        U[0] = vec2{uv_diff1.x, uv_diff2.x};
+        U[1] = vec2{uv_diff1.y, uv_diff2.y};
+
+        // Invert U and multiply to get Tangent (T) and Bitangent (B)
+        mat<4,2> tb = E * U.invert();
+
+        mat<4,3> TBN;
+
+        vec4 n = varying_nrm[0]*bar[0] + varying_nrm[1]*bar[1] + varying_nrm[2]*bar[2];
+        n = normalized(n);
+
+                // Normalize T and B (Crucial for lighting!)
+        vec4 T = normalized(vec4{tb[0][0], tb[1][0], tb[2][0], 0});
+        vec4 B = normalized(vec4{tb[0][1], tb[1][1], tb[2][1], 0});
+
+        // Fill the TBN Matrix (4 Rows, 3 Columns)
+        // Row 0 (X components)
+        TBN[0] = vec3{T.x, B.x, n.x};
+
+        // Row 1 (Y components)
+        TBN[1] = vec3{T.y, B.y, n.y};
+
+        // Row 2 (Z components)
+        TBN[2] = vec3{T.z, B.z, n.z};
+
+        // Row 3 (W components - usually 0 for direction vectors)
+        TBN[3] = vec3{0, 0, 0};
+
+
+
+        
+        
+
+        
+
         
         const TGAImage& diffusemap = model.diffuse();
         int u_diff = uv.x * diffusemap.width();
