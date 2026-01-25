@@ -7,7 +7,29 @@ using namespace std;
 /// saving the colored image work
 extern mat<4,4> ModelView, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
+extern std::vector<double> shadowbuffer; // the shadow buffer
 
+struct DepthShader :IShader{
+    const Model &model;
+    mat<3,3> varying_tri;
+    TGAColor color = {};
+
+    DepthShader (const Model &m) : model(m) {}
+    virtual vec4 vertex(const int face , const int vert){
+
+        vec4 gl_position = ModelView * model.vert(face, vert);
+        gl_position = Perspective * gl_position;
+
+        return gl_position;
+        
+    }
+
+    virtual std::pair<bool,TGAColor> fragment(const vec3 bar) const {
+        TGAColor color = {255,255,255,255};
+
+        return {false, color};
+    }
+};
 struct RandomShader : IShader {
     const Model &model;
     vec4 l;
