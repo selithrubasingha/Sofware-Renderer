@@ -151,12 +151,18 @@ int main(int argc, char** argv) {
     // post-processing
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
-            
+            // eye coords to World coords
             vec4 fragment = M * vec4{(double)x, (double)y, zbuffer_copy[x+y*width], 1.};
 
-            
+            // world coords to light clip coords
             vec4 q = N * fragment;
+
+            //.xyz gets the x,y,z from the vec4 w is the fourth item . 
+            //what does the deviding do ? it finishes the perpective logic (the train tracks logic)
+            // the perp matrix just warmsup for the perp coprds the real calculation is here!
             vec3 p = q.xyz()/q.w;
+
+            //checking if it's lit!
             bool lit =  (fragment.z<-100 ||                                   // it's the background or
                         (p.x<0 || p.x>=shadoww || p.y<0 || p.y>=shadowh) ||   // it is out of bounds of the shadow buffer
                         (p.z > zbuffer[int(p.x) + int(p.y)*shadoww] - .03));  // it is visible
