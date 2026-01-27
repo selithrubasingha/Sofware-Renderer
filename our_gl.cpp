@@ -3,8 +3,6 @@
 
 mat<4,4> ModelView, Viewport, Perspective; // "OpenGL" state matrices
 std::vector<double> zbuffer;               // depth buffer
-#include <vector> // Make sure you have this
-std::vector<double> shadowbuffer;
 
 void lookat(const vec3 eye, const vec3 center, const vec3 up) {
 /*
@@ -68,8 +66,8 @@ zbuffer: If inside, am I closer to the camera than what was drawn before?
             vec3 bc_screen = ABC.invert_transpose() * vec3{static_cast<double>(x), static_cast<double>(y), 1.}; // barycentric coordinates of {x,y} w.r.t the triangle
             vec3 bc_clip   = { bc_screen.x/clip[0].w, bc_screen.y/clip[1].w, bc_screen.z/clip[2].w };     // check https://github.com/ssloy/tinyrenderer/wiki/Technical-difficulties-linear-interpolation-with-perspective-deformations
             bc_clip = bc_clip / (bc_clip.x + bc_clip.y + bc_clip.z);
-            if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0) continue; // negative barycentric coordinate => the pixel is outside the triangle
-            double z = bc_screen * vec3{ ndc[0].z, ndc[1].z, ndc[2].z };   // linear interpolation of the depth
+            if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0) continue;                                                    // negative barycentric coordinate => the pixel is outside the triangle
+            double z = bc_screen * vec3{ ndc[0].z, ndc[1].z, ndc[2].z };  // linear interpolation of the depth
             if (z <= zbuffer[x+y*framebuffer.width()]) continue;   // discard fragments that are too deep w.r.t the z-buffer
             auto [discard, color] = shader.fragment(bc_clip);
             if (discard) continue;                                 // fragment shader can discard current fragment

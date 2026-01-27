@@ -1,5 +1,3 @@
-
-
 #include <fstream>
 #include <sstream>
 #include "model.h"
@@ -27,7 +25,6 @@ Model::Model(const std::string filename) {
             iss >> trash >> trash;
             vec2 uv;
             for (int i : {0,1}) iss >> uv[i];
-            // tex.push_back({uv.x, 1-uv.y});
             tex.push_back({uv.x, 1-uv.y});
         } else if (!line.compare(0, 2, "f ")) {
             int f,t,n, cnt = 0;
@@ -50,13 +47,11 @@ Model::Model(const std::string filename) {
         if (dot==std::string::npos) return;
         std::string texfile = filename.substr(0,dot) + suffix;
         std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
- 
     };
     load_texture("_diffuse.tga",    diffusemap );
+//  load_texture("_glow.tga",    diffusemap );
     load_texture("_nm_tangent.tga", normalmap);
     load_texture("_spec.tga",       specularmap);
-
-    
 }
 
 int Model::nverts() const { return verts.size(); }
@@ -85,4 +80,3 @@ vec2 Model::uv(const int iface, const int nthvert) const {
 
 const TGAImage& Model::diffuse()  const { return diffusemap;  }
 const TGAImage& Model::specular() const { return specularmap; }
-
