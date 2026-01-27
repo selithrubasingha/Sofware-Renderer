@@ -151,8 +151,10 @@ int main(int argc, char** argv) {
     // post-processing
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
-            // Line 154 (Fixed)
+            
             vec4 fragment = M * vec4{(double)x, (double)y, zbuffer_copy[x+y*width], 1.};
+
+            
             vec4 q = N * fragment;
             vec3 p = q.xyz()/q.w;
             bool lit =  (fragment.z<-100 ||                                   // it's the background or
