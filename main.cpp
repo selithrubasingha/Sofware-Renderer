@@ -170,6 +170,11 @@ int main(int argc, char** argv) {
         }
     }
 
+    /*
+We have the mask data ... every x,y coordinate either black or white . 
+We now use a for loop to display only the mask data of black and white
+
+    */
     TGAImage maskimg(width, height, TGAImage::GRAYSCALE);
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
@@ -179,12 +184,24 @@ int main(int argc, char** argv) {
     }
     maskimg.write_tga_file("mask.tga");
 
+    /*
+Now is the real shit . shadow_map + the normal image --> super cool shadow image!
+    */
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
+            //only follow the logic below if it is LIT !
+            // notice that we do stuff for the lit pixels !
             if (mask[x+y*width]) continue;
-            // Line 177 (Fixed)
+            // Remember! the framebuffer is already filled with the normal image data. .. 
+            //we just need to add shadows to it 
             TGAColor c = framebuffer.get(x, y);
             vec3 a = {(double)c[0], (double)c[1], (double)c[2]};
+            /*
+            now we come to the shadow dull color maker 
+             when the pixel is in shadow .. we dullify the color 
+             how do we do that vec3 0-255 --> normalize and we have 0-1 --> multply by 80 we have 0-80 now the color is kindof dullified
+             */
+
             if (norm(a)<80) continue;
             a = normalized(a)*80;
             framebuffer.set(x, y, {(unsigned char) a[0], (unsigned char) a[1], (unsigned char) a[2], 255 });
