@@ -112,12 +112,12 @@ int main(int argc, char** argv) {
 
     constexpr int width  = 800;      // output image size
     constexpr int height = 800;
-    constexpr int shadoww = 8000;    // shadow map buffer size
-    constexpr int shadowh = 8000;
+    constexpr int shadoww = 800;    // shadow map buffer size
+    constexpr int shadowh = 800;
     constexpr vec3  light{ 1, 1, 1}; // light source
     constexpr vec3    eye{-1, 0, 2}; // camera position
     constexpr vec3 center{ 0, 0, 0}; // camera direction
-    constexpr vec3     up{ 0, 1, 0}; // camera up vector
+    constexpr vec3     up{ 0, 1, 0.001}; // camera up vector
 
     makeLightDirections();
     // usual rendering pass
@@ -134,14 +134,11 @@ int main(int argc, char** argv) {
         models.push_back(new Model(argv[m])); 
     }
 
-    for (int m=1; m<argc; m++) {                    // iterate through all input objects
-        Model model(argv[m]);                       // load the data
-        PhongShader shader(light, model);
-        for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
-            Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
-                              shader.vertex(f, 1),
-                              shader.vertex(f, 2) };
-            rasterize(clip, shader, framebuffer);   // rasterize the primitive
+    for (Model* model : models) {
+        PhongShader shader(light, *model);
+        for (int f=0; f<model->nfaces(); f++) {
+            Triangle clip = { shader.vertex(f, 0), shader.vertex(f, 1), shader.vertex(f, 2) };
+            rasterize(clip, shader, framebuffer);
         }
     }
     framebuffer.write_tga_file("framebuffer.tga");
@@ -151,7 +148,7 @@ int main(int argc, char** argv) {
     mat<4,4> M = (Viewport * Perspective * ModelView).invert();
 
     std::vector<float> total_light_hits(width * height, 0.0f);
-
+    TGAImage dummy(shadoww, shadowh, TGAImage::RGB);
     for (int i = 0 ; i<1000;i++){
         { // shadow rendering pass
             vec3 currentLightPos = lightDirections[i] * 3.0f; // Multiplied by radius
@@ -161,16 +158,15 @@ int main(int argc, char** argv) {
             init_zbuffer(shadoww, shadowh);
             TGAImage trash(shadoww, shadowh, TGAImage::RGB, {177, 195, 209, 255});
 
-            for (int m=1; m<argc; m++) {                    // iterate through all input objects
-                Model model(argv[m]);                       // load the data
-                BlankShader shader{model};
-                for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
-                    Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
-                                    shader.vertex(f, 1),
-                                    shader.vertex(f, 2) };
-                    rasterize(clip, shader, trash);         // rasterize the primitive
-                }
+            for (Model* model : models) { // Use loaded models (Fast!)
+            BlankShader shader(*model);
+            for (int f=0; f<model->nfaces(); f++) {
+                Triangle clip = { shader.vertex(f, 0), shader.vertex(f, 1), shader.vertex(f, 2) };
+                // Pass nullptr or dummy image
+                
+                rasterize(clip, shader, dummy);
             }
+        }
             
         }
 
@@ -203,19 +199,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        /*
-    We have the mask data ... every x,y coordinate either black or white . 
-    We now use a for loop to display only the mask data of black and white
 
-        */
-        // TGAImage maskimg(width, height, TGAImage::GRAYSCALE);
-        // for (int x=0; x<width; x++) {
-        //     for (int y=0; y<height; y++) {
-        //         if (mask[x+y*width]) continue;
-        //         maskimg.set(x, y, {255, 255, 255, 255});
-        //     }
-        // }
-        // maskimg.write_tga_file("mask.tga");
 
         if (i % 100 == 0) std::cout << "Sample " << i << " / " << numSamples << std::endl;
     }
@@ -255,6 +239,7 @@ Now is the real shit . shadow_map + the normal image --> super cool shadow image
     ao_image.write_tga_file("ao_pass.tga");
     framebuffer.write_tga_file("final_render.tga");
 
+    for(Model* m : models) delete m;
 
     return 0;
 }
