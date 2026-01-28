@@ -3,6 +3,7 @@
 
 extern mat<4,4> Viewport, ModelView, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
+std::vector<vec3> lightDirections;
 
 struct BlankShader : IShader {
     const Model &model;
@@ -59,6 +60,26 @@ struct PhongShader : IShader {
         return {false, gl_FragColor};                             // do not discard the pixel
     }
 };
+
+const int numSamples = 1000;
+const float PI = 3.14159265359;
+const float goldenAngle = PI * (3.0 - sqrt(5.0));
+
+void makeLightDirections(){
+    for (int i = 0 ; i< numSamples; ++i){
+        //we need to do from 1-->0  including the decimal values!
+        float y = 1.0f - ((float)i / (float)(numSamples - 1));
+
+        float radius = sqrt(1.0f - y*y);
+
+        float theta = goldenAngle * i;
+
+        float x = cos(theta) * radius;
+        float z = sin(theta) * radius;
+
+        lightDirections.push_back({x,y,z});
+    }
+}
 
 void drop_zbuffer(std::string filename, std::vector<double> &zbuffer, int width, int height) {
     TGAImage zimg(width, height, TGAImage::GRAYSCALE, {0,0,0,0});
