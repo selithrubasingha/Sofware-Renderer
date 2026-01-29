@@ -8,10 +8,12 @@
 extern mat<4,4> Viewport, ModelView, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
 
-struct EmptyShader : IShader {
+struct BlankShader
+ : IShader {
     const Model &model;
 
-    EmptyShader(const Model &m) : model(m) {}
+    BlankShader
+    (const Model &m) : model(m) {}
 
     virtual vec4 vertex(const int face, const int vert) {
         vec4 gl_Position = ModelView * model.vert(face, vert);
@@ -32,8 +34,6 @@ int main(int argc, char** argv) {
 
     constexpr int width  = 800;      // output image size
     constexpr int height = 800;
-    constexpr int shadoww = 8000;    // shadow map buffer size
-    constexpr int shadowh = 8000;
     constexpr vec3    eye{-1, 0, 2}; // camera position
     constexpr vec3 center{ 0, 0, 0}; // camera direction
     constexpr vec3     up{ 0, 1, 0}; // camera up vector
@@ -47,7 +47,8 @@ int main(int argc, char** argv) {
 
     for (int m=1; m<argc; m++) {                    // iterate through all input objects
         Model model(argv[m]);                       // load the data
-        EmptyShader shader{model};
+        BlankShader
+         shader{model};
         for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
             Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
                               shader.vertex(f, 1),
@@ -55,16 +56,18 @@ int main(int argc, char** argv) {
             rasterize(clip, shader, framebuffer);   // rasterize the primitive
         }
     }
-    framebuffer.write_tga_file("framebuffer.tga");
+  
 
-    std::vector<double> mask(width*height, 0);
-    std::vector<double> zbuffer_copy = zbuffer;
-    mat<4,4> M = (Viewport * Perspective * ModelView).invert();
+    constexpr double ao_radius = .1;  // ssao ball radius in normalized device coordinates
+    constexpr int nsamples = 128;     // number of samples in the ball
+    //initilizing of creating random values
+    std::random_device rd;
+    
+    //launching the random values generaotr ! 
+    std::mt19937 gen(rd());
 
-    // shadow rendering pass
-    std::mt19937 gen(std::random_device{}());
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
-    constexpr int n = 1000;
+    //filtering the set of rand values to be between 0.1 and 128
+    std::uniform_real_distribution<double> dist(-ao_radius, ao_radius);
 
     auto smoothstep = [](double edge0, double edge1, double x) {         // smoothstep returns 0 if the input is less than the left edge,
             double t = std::clamp((x - edge0)/(edge1 - edge0), 0., 1.);  // 1 if the input is greater than the right edge,
@@ -90,7 +93,8 @@ int main(int argc, char** argv) {
 
         for (int m=1; m<argc; m++) {                    // iterate through all input objects
             Model model(argv[m]);                       // load the data
-            EmptyShader shader{model};
+            BlankShader
+             shader{model};
             for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
                 Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
                     shader.vertex(f, 1),
