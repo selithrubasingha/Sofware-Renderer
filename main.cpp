@@ -1,9 +1,12 @@
+#include <random>
+#include <algorithm>
+#include <cmath>
+
 #include "our_gl.h"
 #include "model.h"
 
 extern mat<4,4> Viewport, ModelView, Perspective; // "OpenGL" state matrices and
 extern std::vector<double> zbuffer;     // the depth buffer
-std::vector<vec3> lightDirections;
 
 struct BlankShader : IShader {
     const Model &model;
@@ -20,90 +23,6 @@ struct BlankShader : IShader {
     }
 };
 
-struct PhongShader : IShader {
-    const Model &model;
-    vec4 l;              // light direction in eye coordinates
-    vec2  varying_uv[3]; // triangle uv coordinates, written by the vertex shader, read by the fragment shader
-    vec4 varying_nrm[3]; // normal per vertex to be interpolated by the fragment shader
-    vec4 tri[3];         // triangle in view coordinates
-
-    PhongShader(const vec3 light, const Model &m) : model(m) {
-        l = normalized((ModelView*vec4{light.x, light.y, light.z, 0.})); // transform the light vector to view coordinates
-    }
-
-    virtual vec4 vertex(const int face, const int vert) {
-        varying_uv[vert]  = model.uv(face, vert);
-        varying_nrm[vert] = ModelView.invert_transpose() * model.normal(face, vert);
-        vec4 gl_Position = ModelView * model.vert(face, vert);
-        tri[vert] = gl_Position;
-        return Perspective * gl_Position;                         // in clip coordinates
-    }
-
-    virtual std::pair<bool,TGAColor> fragment(const vec3 bar) const {
-        mat<2,4> E = { tri[1]-tri[0], tri[2]-tri[0] };
-        mat<2,2> U = { varying_uv[1]-varying_uv[0], varying_uv[2]-varying_uv[0] };
-        mat<2,4> T = U.invert() * E;
-        mat<4,4> D = {normalized(T[0]),  // tangent vector
-                      normalized(T[1]),  // bitangent vector
-                      normalized(varying_nrm[0]*bar[0] + varying_nrm[1]*bar[1] + varying_nrm[2]*bar[2]), // interpolated normal
-                      {0,0,0,1}}; // Darboux frame
-        vec2 uv = varying_uv[0] * bar[0] + varying_uv[1] * bar[1] + varying_uv[2] * bar[2];
-        vec4 n = normalized(D.transpose() * model.normal(uv));
-        vec4 r = normalized(n * (n * l)*2 - l);                   // reflected light direction
-        double ambient  = .4;                                     // ambient light intensity
-        double diffuse  = 1.*std::max(0., n * l);                 // diffuse light intensity
-        double specular = (1.+3.*sample2D(model.specular(), uv)[0]/255.) * std::pow(std::max(r.z, 0.), 35);  // specular intensity, note that the camera lies on the z-axis (in eye coordinates), therefore simple r.z, since (0,0,1)*(r.x, r.y, r.z) = r.z
-        TGAColor gl_FragColor = sample2D(model.diffuse(), uv);
-//      TGAColor gl_FragColor = {255, 255, 255, 255};
-        for (int channel : {0,1,2})
-            gl_FragColor[channel] = std::min<int>(255, gl_FragColor[channel]*(ambient + diffuse + specular));
-        return {false, gl_FragColor};                             // do not discard the pixel
-    }
-};
-
-const int numSamples = 1000;
-const float PI = 3.14159265359;
-const float goldenAngle = PI * (3.0 - sqrt(5.0));
-
-void makeLightDirections(){
-    for (int i = 0 ; i< numSamples; ++i){
-        //we need to do from 1-->0  including the decimal values!
-        float y = 1.0f - ((float)i / (float)(numSamples - 1));
-
-        float radius = sqrt(1.0f - y*y);
-
-        float theta = goldenAngle * i;
-
-        float x = cos(theta) * radius;
-        float z = sin(theta) * radius;
-
-        lightDirections.push_back({x,y,z});
-    }
-}
-
-void drop_zbuffer(std::string filename, std::vector<double> &zbuffer, int width, int height) {
-    TGAImage zimg(width, height, TGAImage::GRAYSCALE, {0,0,0,0});
-    double minz = +1000;
-    double maxz = -1000;
-    for (int x=0; x<width; x++) {
-        for (int y=0; y<height; y++) {
-            double z = zbuffer[x+y*width];
-            if (z<-100) continue;
-            minz = std::min(z, minz);
-            maxz = std::max(z, maxz);
-        }
-    }
-    for (int x=0; x<width; x++) {
-        for (int y=0; y<height; y++) {
-            unsigned char z = zbuffer[x+y*width];
-            if (z<-100) continue;
-            z = (z - minz)/(maxz-minz) * 255;
-            zimg.set(x, y, {z, 255, 255, 255});
-        }
-    }
-    zimg.write_tga_file(filename);
-}
-
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " obj/model.obj" << std::endl;
@@ -112,134 +31,60 @@ int main(int argc, char** argv) {
 
     constexpr int width  = 800;      // output image size
     constexpr int height = 800;
-    constexpr int shadoww = 800;    // shadow map buffer size
-    constexpr int shadowh = 800;
-    constexpr vec3  light{ 1, 1, 1}; // light source
     constexpr vec3    eye{-1, 0, 2}; // camera position
     constexpr vec3 center{ 0, 0, 0}; // camera direction
-    constexpr vec3     up{ 0, 1, 0.001}; // camera up vector
+    constexpr vec3     up{ 0, 1, 0}; // camera up vector
 
-    makeLightDirections();
     // usual rendering pass
     lookat(eye, center, up);
     init_perspective(norm(eye-center));
     init_viewport(width/16, height/16, width*7/8, height*7/8);
     init_zbuffer(width, height);
     TGAImage framebuffer(width, height, TGAImage::RGB, {177, 195, 209, 255});
-//    TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    //loading the models beforehand
-    std::vector<Model*> models;
-    for (int m = 1; m < argc; m++) {
-        models.push_back(new Model(argv[m])); 
-    }
-
-    for (Model* model : models) {
-        PhongShader shader(light, *model);
-        for (int f=0; f<model->nfaces(); f++) {
-            Triangle clip = { shader.vertex(f, 0), shader.vertex(f, 1), shader.vertex(f, 2) };
-            rasterize(clip, shader, framebuffer);
+    for (int m=1; m<argc; m++) {                    // iterate through all input objects
+        Model model(argv[m]);                       // load the data
+        BlankShader shader{model};
+        for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
+            Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
+                              shader.vertex(f, 1),
+                              shader.vertex(f, 2) };
+            rasterize(clip, shader, framebuffer);   // rasterize the primitive
         }
     }
-    framebuffer.write_tga_file("framebuffer.tga");
 
-    std::vector<bool> mask(width*height, false);
-    std::vector<double> zbuffer_copy = zbuffer;
-    mat<4,4> M = (Viewport * Perspective * ModelView).invert();
+    constexpr double ao_radius = .1;  // ssao ball radius in normalized device coordinates
+    constexpr int nsamples = 128;     // number of samples in the ball
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dist(-ao_radius, ao_radius);
+    auto smoothstep = [](double edge0, double edge1, double x) {         // smoothstep returns 0 if the input is less than the left edge,
+            double t = std::clamp((x - edge0)/(edge1 - edge0), 0., 1.);  // 1 if the input is greater than the right edge,
+            return t*t*(3 - 2*t);                                        // Hermite interpolation inbetween. The derivative of the smoothstep function is zero at both edges.
+    };
 
-    std::vector<float> total_light_hits(width * height, 0.0f);
-    TGAImage dummy(shadoww, shadowh, TGAImage::RGB);
-    for (int i = 0 ; i<1000;i++){
-        { // shadow rendering pass
-            vec3 currentLightPos = lightDirections[i] * 3.0f; // Multiplied by radius
-            lookat(currentLightPos, center, up);
-            init_perspective(norm(eye-center));
-            init_viewport(shadoww/16, shadowh/16, shadoww*7/8, shadowh*7/8);
-            init_zbuffer(shadoww, shadowh);
-            TGAImage trash(shadoww, shadowh, TGAImage::RGB, {177, 195, 209, 255});
-
-            for (Model* model : models) { // Use loaded models (Fast!)
-            BlankShader shader(*model);
-            for (int f=0; f<model->nfaces(); f++) {
-                Triangle clip = { shader.vertex(f, 0), shader.vertex(f, 1), shader.vertex(f, 2) };
-                // Pass nullptr or dummy image
-                
-                rasterize(clip, shader, dummy);
-            }
-        }
-            
-        }
-
-
-        mat<4,4> N = Viewport * Perspective * ModelView;
-
-
-        // post-processing
-        for (int x=0; x<width; x++) {
-            for (int y=0; y<height; y++) {
-                // eye coords to World coords
-                vec4 fragment = M * vec4{(double)x, (double)y, zbuffer_copy[x+y*width], 1.};
-
-                // world coords to light clip coords
-                vec4 q = N * fragment;
-
-                //.xyz gets the x,y,z from the vec4 w is the fourth item . 
-                //what does the deviding do ? it finishes the perpective logic (the train tracks logic)
-                // the perp matrix just warmsup for the perp coprds the real calculation is here!
-                vec3 p = q.xyz()/q.w;
-
-                //checking if it's lit!
-                bool lit =  (fragment.z<-100 ||                                   // it's the background or
-                            (p.x<0 || p.x>=shadoww || p.y<0 || p.y>=shadowh) ||   // it is out of bounds of the shadow buffer
-                            (p.z > zbuffer[int(p.x) + int(p.y)*shadoww] - .03));  // it is visible
-                mask[x+y*width] = lit;
-                if (lit) {
-                    total_light_hits[x + y * width] += 1.0f;
-                }
-            }
-        }
-
-
-
-        if (i % 100 == 0) std::cout << "Sample " << i << " / " << numSamples << std::endl;
-    }
-    /*
-Now is the real shit . shadow_map + the normal image --> super cool shadow image!
-    */
-   TGAImage ao_image(width, height, TGAImage::GRAYSCALE);
-
+#pragma omp parallel for
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
-            //only follow the logic below if it is LIT !
-            // notice that we do stuff for the lit pixels !
-
-
-            float occlusion = total_light_hits[x + y * width] / (float)numSamples;
-            
-            // Save pure AO map for debugging
-            ao_image.set(x, y, {
-                (unsigned char)(occlusion * 255), 
-                (unsigned char)(occlusion * 255), 
-                (unsigned char)(occlusion * 255), 
-                255
-            });
-
-            // Apply to your colored framebuffer
+            double z = zbuffer[x+y*width];
+            if (z<-100) continue;
+            vec4 fragment = Viewport.invert() * vec4{x, y, z, 1.}; // for each fragment in the framebuffer
+            double vote   = 0;
+            double voters = 0;
+            for(int i=0; i<nsamples; i++) {                                         // compute a very rough approximation of the solid angle
+                vec4 p = Viewport * (fragment + vec4{dist(gen), dist(gen), dist(gen), 0.});
+                if (p.x<0 || p.x>=width || p.y<0 || p.y>=height) continue;
+                double d = zbuffer[int(p.x) + int(p.y)*width];
+                if (z + 5*ao_radius < d) continue;                         // range check to remove the dark halo
+                voters++;
+                vote += d > p.z;
+            }
+            double ssao = smoothstep(0, 1, 1 - vote/voters*.4);
             TGAColor c = framebuffer.get(x, y);
-            
-            // Simple Multiply Blending: Color * Occlusion
-            framebuffer.set(x, y, {
-                (unsigned char)(c[0] * occlusion),
-                (unsigned char)(c[1] * occlusion),
-                (unsigned char)(c[2] * occlusion),
-                255
-            });
+            framebuffer.set(x, y, { c[0]*ssao, c[1]*ssao, c[2]*ssao, c[3] });
         }
     }
-    ao_image.write_tga_file("ao_pass.tga");
-    framebuffer.write_tga_file("final_render.tga");
 
-    for(Model* m : models) delete m;
-
+    framebuffer.write_tga_file("framebuffer.tga");
     return 0;
 }
