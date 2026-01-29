@@ -81,7 +81,9 @@ int main(int argc, char** argv) {
             }
             double ssao = smoothstep(0, 1, 1 - vote/voters*.4);
             TGAColor c = framebuffer.get(x, y);
-            framebuffer.set(x, y, { c[0]*ssao, c[1]*ssao, c[2]*ssao, c[3] });
+            framebuffer.set(x, y, { (unsigned char)(c[0] * ssao),
+                (unsigned char)(c[1] * ssao),
+                (unsigned char)(c[2] * ssao), c[3] });
         }
     }
 
