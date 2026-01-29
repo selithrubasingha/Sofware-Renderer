@@ -74,84 +74,40 @@ int main(int argc, char** argv) {
             return t*t*(3 - 2*t);                                        // Hermite interpolation inbetween. The derivative of the smoothstep function is zero at both edges.
     };
 
-    for (int i = 0; i < n; ++i) {
-        std::cerr << i << std::endl;
-        double y = dist(gen);
-        double theta = 2.0 * M_PI * dist(gen);
-        double r = std::sqrt(1.0 - y*y);
-        vec3 light = vec3{r * std::cos(theta), y, r * std::sin(theta)}*1.5;
-
-        std::cout << "v " << light << std::endl;
-
-        lookat(light, center, up);
-        ModelView[3][3] =    norm(light-center);
-
-        init_perspective(norm(eye-center));
-        init_viewport(shadoww/16, shadowh/16, shadoww*7/8, shadowh*7/8);
-        init_zbuffer(shadoww, shadowh);
-        TGAImage trash(shadoww, shadowh, TGAImage::RGB, {177, 195, 209, 255});
-
-        for (int m=1; m<argc; m++) {                    // iterate through all input objects
-            Model model(argv[m]);                       // load the data
-            BlankShader
-             shader{model};
-            for (int f=0; f<model.nfaces(); f++) {      // iterate through all facets
-                Triangle clip = { shader.vertex(f, 0),  // assemble the primitive
-                    shader.vertex(f, 1),
-                    shader.vertex(f, 2) };
-                rasterize(clip, shader, trash);         // rasterize the primitive
-            }
-        }
-//      trash.write_tga_file(std::string("shadowmap") + std::to_string(i) + std::string(".tga"));
-
-        mat<4,4> N = Viewport * Perspective * ModelView;
-
-        // post-processing
-#pragma omp parallel for
-        for (int x=0; x<width; x++) {
-            for (int y=0; y<height; y++) {
-                vec4 fragment = M * vec4{x, y, zbuffer_copy[x+y*width], 1.};
-                vec4 q = N * fragment;
-                vec3 p = q.xyz()/q.w;
-                double lit =  (fragment.z<-100 ||                                     // it's the background or
-                               (p.x>=0 && p.x<shadoww && p.y>=0 && p.y<shadowh &&     // it is not out of bounds of the shadow buffer
-                               (p.z > zbuffer[int(p.x) + int(p.y)*shadoww] - .03)));  // it is visible
-                mask[x+y*width] += (lit - mask[x+y*width])/(i+1.);
-            }
-        }
-
-    }
-
 #pragma omp parallel for
     for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
-            double m = smoothstep(-1, 1, mask[x+y*width]);
-            TGAColor c = framebuffer.get(x, y);
-            framebuffer.set(x, y, { c[0]*m, c[1]*m, c[2]*m, c[3] });
-        }
-    }
-    framebuffer.write_tga_file("shadow.tga");
+            /*
+            the vote and voters logic 
 
-    // post-processing 2: edge detection
-    constexpr double threshold = .15;
-    for (int y = 1; y < framebuffer.height() - 1; ++y) {
-        for (int x = 1; x < framebuffer.width() - 1; ++x) {
-            vec2 sum;
-            for (int j = -1; j <= 1; ++j) {
-                for (int i = -1; i <= 1; ++i) {
-                    constexpr int Gx[3][3] = { {-1,  0,  1}, {-2, 0, 2}, {-1, 0, 1} };
-                    constexpr int Gy[3][3] = { {-1, -2, -1}, { 0, 0, 0}, { 1, 2, 1} };
-                    sum = sum + vec2{
-                        Gx[j + 1][i + 1] * zbuffer_copy[x+i + (y+j)*width],
-                        Gy[j + 1][i + 1] * zbuffer_copy[x+i + (y+j)*width]
-                    };
-                }
+            vote - yes --> how many how the light is blocked 
+
+            we use this percentage or fraction to determine how lit the area is !
+            */
+            double z = zbuffer[x+y*width];
+            if (z<-100) continue;
+            vec4 fragment = Viewport.invert() * vec4{x, y, z, 1.}; // for each fragment in the framebuffer
+            double vote   = 0;
+            double voters = 0;
+            //I gues we get 128 random nums huh!
+            for(int i=0; i<nsamples; i++) {                                         // compute a very rough approximation of the solid angle
+                vec4 p = Viewport * (fragment + vec4{dist(gen), dist(gen), dist(gen), 0.});
+                if (p.x<0 || p.x>=width || p.y<0 || p.y>=height) continue;
+                double d = zbuffer[int(p.x) + int(p.y)*width];
+                if (z + 5*ao_radius < d) continue;                         // range check to remove the dark halo
+                voters++;
+                vote += d > p.z;
             }
-            if (norm(sum)>threshold)
-                framebuffer.set(x, y, TGAColor{0, 0, 0, 255});
+            /*
+            what does this smooth step do ? imageine turning a y=x into a kindof like s like (__/--).
+            it makes the low lit shadow even LOWER and somehwat lit values EVEN HIGHER !
+            */
+            double ssao = smoothstep(0, 1, 1 - vote/voters*.4);
+            TGAColor c = framebuffer.get(x, y);
+            framebuffer.set(x, y, { c[0]*ssao, c[1]*ssao, c[2]*ssao, c[3] });
         }
     }
-    framebuffer.write_tga_file("edges.tga");
 
+    framebuffer.write_tga_file("framebuffer.tga");
     return 0;
 }
