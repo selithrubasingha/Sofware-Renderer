@@ -81,6 +81,36 @@ int main(int argc, char** argv) {
     }
 
     // post-processing: edge detection
+    constexpr double threshold = 0.15;
+
+    constexpr int Gx[3][3] = { {-1,  0,  1}, {-2, 0, 2}, {-1, 0, 1} };
+    constexpr int Gy[3][3] = { {-1, -2, -1}, { 0, 0, 0}, { 1, 2, 1} };
+    
+    for (int y = 1;y< framebuffer.height() -1 ; y++){
+        for (int x = 1; x< framebuffer.width() - 1;x++){
+            vec2 sum;
+
+            for (int j=-1;j<=1;j++){
+                for (int i = -1 ; i<=1; i++){
+                    double val = zbuffer[(x + i)+(y+j)*width];
+                    sum = sum+ vec2{
+                        Gx[j + 1][i + 1] * val,
+                        Gy[j + 1][i + 1] * val
+
+                    };
+
+
+                }
+
+
+            }
+
+            if (norm(sum)>threshold)
+            framebuffer.set(x,y,TGAColor{0,0,0,255});
+
+        }
+    }
+
     
 
     framebuffer.write_tga_file("framebuffer.tga");
