@@ -25,7 +25,24 @@ struct ToonShader : IShader {
     }
 
     virtual std::pair<bool,TGAColor> fragment(const vec3 bar) const {
+        vec4 n = normalized(varying_nrm[0]*bar[0]+varying_nrm[1]*bar[1]+varying_nrm[2]*bar[2]);
+
+        double diffuse = std::max(0., n*l);
+
+        double intensity = .15 + diffuse;
+
+        if (intensity>0.66) intensity = 1;
+        else if(intensity>0.33) intensity = 0.66;
+        else intensity = 0.33;
+
+        TGAColor gl_FragColor;
+
+        for (int channel : {0,1,2})
+            gl_FragColor[channel] = std::min<int>(255, color[channel]*intensity);
+
+        return {false , gl_FragColor};
         
+
     }
     };
 
