@@ -11,7 +11,7 @@ Over the last 1.5 months, I stepped away WebDev and AI  to understand **how grap
 
 ---
 
-## 🚀 What I Built
+##  What I Built
 
 This is a fully functional 3D renderer that takes `.obj` files and renders them into `.tga` images. It features:
 
@@ -29,7 +29,7 @@ This is a fully functional 3D renderer that takes `.obj` files and renders them 
 
 ---
 
-## 🧠 What I Learned (The "Aha!" Moments)
+##  What I Learned
 
 This project was a deep dive into the intersection of Computer Science and Mathematics. Here are my biggest takeaways:
 
@@ -40,12 +40,12 @@ I finally saw the real-world application of **Linear Algebra**. Matrix multiplic
 * **Model-View-Projection (MVP):** I built the matrices manually to transform vertices from 3D space to screen coordinates.
 * **Barycentric Coordinates:** The magic math used to fill triangles and interpolate textures.
 
-### 2. High-Performance C++ 🔥
+### 2. High-Performance C++ 
 
 * **Low-Level Memory:** I got my hands dirty with raw pointers, memory management, and understanding how data is laid out in RAM.
 * **Parallel Processing:** The coolest optimization I added was using OpenMP (`#pragma omp parallel for`). I learned how to distribute the rendering workload across all CPU cores, massively speeding up the frame generation.
 
-### 3. The Graphics Pipeline 🖼️
+### 3. The Graphics Pipeline 
 
 I now understand the journey of a pixel:
 
